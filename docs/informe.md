@@ -19,8 +19,8 @@ una coincidencia. Sin embargo, con solo 23 personas la probabilidad ya supera
 el 50%, y con 57 personas pasa el 99%.
 
 La intuición falla porque uno tiende a pensar en cuántas personas comparten
-cumpleaños *con uno mismo*, que son 22 comparaciones. Pero la pregunta es si
-existe alguna coincidencia entre *cualquier* par del grupo, y en un grupo de 23
+cumpleaños _con uno mismo_, que son 22 comparaciones. Pero la pregunta es si
+existe alguna coincidencia entre _cualquier_ par del grupo, y en un grupo de 23
 personas hay 23 × 22 / 2 = 253 pares posibles. Es esa cantidad de pares, y no
 la cantidad de personas, la que hace crecer la probabilidad tan rápido.
 
@@ -32,7 +32,7 @@ exactamente dos personas, que coincidan tres, que haya dos pares separados, y
 así sucesivamente.
 
 Resulta mucho más simple calcular el **complemento**: la probabilidad de que
-*ninguna* persona comparta cumpleaños, es decir, que las K personas cumplan
+_ninguna_ persona comparta cumpleaños, es decir, que las K personas cumplan
 todas en días diferentes. Ese es un solo caso.
 
 Pensemos que las personas entran a una sala de a una por vez:
@@ -45,7 +45,7 @@ Pensemos que las personas entran a una sala de a una por vez:
 - Y así hasta la persona K, que debe evitar K−1 días.
 
 Como los cumpleaños son independientes entre sí, la probabilidad de que
-*todas* eviten a las anteriores es el producto de todas esas fracciones:
+_todas_ eviten a las anteriores es el producto de todas esas fracciones:
 
     P(ninguna coincidencia) = (365/365) × (364/365) × ... × ((365 − K + 1)/365)
 
@@ -55,14 +55,14 @@ Y la probabilidad que buscamos es la contraria:
 
 Evaluando la fórmula se obtienen los valores conocidos:
 
-| K | P(K) |
-|---|---|
-| 10 | 0.1169 |
-| 20 | 0.4114 |
-| 23 | 0.5073 |
-| 30 | 0.7063 |
-| 50 | 0.9704 |
-| 57 | 0.9901 |
+| K   | P(K)   |
+| --- | ------ |
+| 10  | 0.1169 |
+| 20  | 0.4114 |
+| 23  | 0.5073 |
+| 30  | 0.7063 |
+| 50  | 0.9704 |
+| 57  | 0.9901 |
 
 En el código, esta fórmula está implementada en la función
 `probabilidad_teorica` de `src/cumpleanos.c`.
@@ -75,7 +75,7 @@ en la realidad no se cumplen del todo:
 1. **Los 365 días son igualmente probables.** En la práctica los nacimientos
    no se distribuyen de manera uniforme a lo largo del año: hay meses con más
    nacimientos que otros. Esta desviación hace que la probabilidad real de
-   coincidencia sea levemente *mayor* que la calculada.
+   coincidencia sea levemente _mayor_ que la calculada.
 2. **No se consideran los años bisiestos.** Se ignora el 29 de febrero.
 3. **Los cumpleaños son independientes entre sí.** No se contemplan mellizos
    ni grupos formados por familiares.
@@ -184,14 +184,14 @@ comparables entre sí.
 
 ### 5.1 Convergencia
 
-*(Pendiente: correr el experimento 1 de docs/como-correr.md)*
+_(Pendiente: correr el experimento 1 de docs/como-correr.md)_
 
 Se espera que el error disminuya proporcionalmente a 1/√T, que es la velocidad
 de convergencia característica del método de Monte Carlo.
 
 ### 5.2 Curva P(K)
 
-*(Pendiente: correr el experimento 2 de docs/como-correr.md)*
+_(Pendiente: correr el experimento 2 de docs/como-correr.md)_
 
 ### 5.3 Speedup y eficiencia
 
@@ -202,12 +202,12 @@ como pide la consigna. Se incluye además el promedio recortado (descartando el
 valor mínimo y el máximo) como verificación independiente.
 
 | Procesos | Mediana (s) | Speedup | Eficiencia | Prom. recortado (s) | Speedup |
-|---|---|---|---|---|---|
-| 1 | 1.325 | 1.00 | 1.00 | 1.334 | 1.00 |
-| 2 | 0.661 | 2.00 | 1.00 | 0.664 | 2.01 |
-| 4 | 0.328 | 4.05 | 1.01 | 0.332 | 4.02 |
-| 6 | 0.233 | 5.68 | 0.95 | 0.234 | 5.69 |
-| 8 | 0.205 | 6.47 | 0.81 | 0.208 | 6.40 |
+| -------- | ----------- | ------- | ---------- | ------------------- | ------- |
+| 1        | 1.325       | 1.00    | 1.00       | 1.334               | 1.00    |
+| 2        | 0.661       | 2.00    | 1.00       | 0.664               | 2.01    |
+| 4        | 0.328       | 4.05    | 1.01       | 0.332               | 4.02    |
+| 6        | 0.233       | 5.68    | 0.95       | 0.234               | 5.69    |
+| 8        | 0.205       | 6.47    | 0.81       | 0.208               | 6.40    |
 
 Fórmulas utilizadas: **Sp = T1 / Tp** y **Ep = Sp / p**.
 
@@ -231,13 +231,13 @@ Observaciones:
 
 ### 5.4 Comparación entre sistemas
 
-*(Pendiente: correr el experimento 3 en las otras dos notebooks y en el
-servidor de la facultad)*
+_(Pendiente: correr el experimento 3 en las otras dos notebooks y en el
+servidor de la facultad)_
 
 ## 6. Conclusiones
 
-*(Pendiente hasta completar los experimentos 1, 2 y 4. Lo que ya se puede
-afirmar:)*
+_(Pendiente hasta completar los experimentos 1, 2 y 4. Lo que ya se puede
+afirmar:)_
 
 1. La simulación reproduce el valor teórico con buena precisión: con 2.000.000
    de grupos y K=23 se obtuvo una probabilidad estimada de 0.5070 frente al
@@ -261,12 +261,8 @@ afirmar:)*
   de coincidencia respecto del modelo uniforme.
 - **Problema generalizado:** permitir años de D días, lo que conecta el
   problema con las colisiones de funciones de hash en criptografía (el llamado
-  *birthday attack*).
+  _birthday attack_).
 - **Semilla configurable por línea de comandos**, necesaria para el
   experimento de convergencia con repeticiones independientes.
 - **Balance de carga dinámico** para máquinas con núcleos de distinta
   velocidad, en lugar del reparto estático actual.
-
-## 8. Bibliografía
-
-Ver [bibliografia.md](bibliografia.md).

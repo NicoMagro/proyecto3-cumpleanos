@@ -10,7 +10,7 @@
 ## Falta
 
 - [ ] Repartir quien hace que
-- [ ] Buscar bibliografia y completar `docs/bibliografia.md`
+- [ ] Buscar bibliografia y escribir la seccion 8 del informe
 - [ ] Experimento 1: convergencia (ver docs/como-correr.md)
 - [ ] Experimento 2: curva P(K)
 - [ ] Experimento 3: speedup en las otras dos notebooks

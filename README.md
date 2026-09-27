@@ -45,7 +45,7 @@ Mas detalles y los comandos de los experimentos en [docs/como-correr.md](docs/co
 | `src/paralelo.c` | Programa con MPI |
 | `src/graficos.py` | Genera los graficos a partir de los resultados |
 | `tests/` | Tests de las funciones y de la version paralela |
-| `docs/` | Informe, bibliografia y como correr todo |
+| `docs/` | Informe, roadmap y como correr todo |
 | `resultados/` | Los CSV y los graficos de cada maquina |
 
 ## Resultado que ya tenemos
