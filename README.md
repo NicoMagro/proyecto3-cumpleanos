@@ -51,14 +51,14 @@ Mas detalles y los comandos de los experimentos en [docs/como-correr.md](docs/co
 ## Resultado que ya tenemos
 
 Speedup medido en la notebook de Nicolas (2 millones de grupos, K=23,
-mediana de 3 corridas):
+mediana de 10 corridas):
 
-| Procesos | Tiempo | Speedup | Eficiencia |
+| Procesos | Mediana | Speedup | Eficiencia |
 |---|---|---|---|
-| 1 | 1.330 s | 1.00 | 1.00 |
-| 2 | 0.662 s | 2.01 | 1.00 |
-| 4 | 0.338 s | 3.93 | 0.98 |
-| 6 | 0.230 s | 5.78 | 0.96 |
-| 8 | 0.196 s | 6.79 | 0.85 |
+| 1 | 1.325 s | 1.00 | 1.00 |
+| 2 | 0.661 s | 2.00 | 1.00 |
+| 4 | 0.328 s | 4.05 | 1.01 |
+| 6 | 0.233 s | 5.68 | 0.95 |
+| 8 | 0.205 s | 6.47 | 0.81 |
 
 Falta correr lo mismo en las otras dos notebooks y en el servidor.

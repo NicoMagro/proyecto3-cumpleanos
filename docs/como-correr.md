@@ -59,13 +59,13 @@ done
 ## Experimento 3: speedup
 
 La consigna pide correr varias veces y quedarse con la mediana, asi que
-repetimos cada configuracion 5 veces.
+repetimos cada configuracion 10 veces.
 
 ```bash
 # Guardamos el encabezado una sola vez
 echo "tipo,k,grupos,procesos,p_simulada,p_teorica,tiempo" > resultados/speedup.csv
 
-for repeticion in 1 2 3 4 5
+for repeticion in 1 2 3 4 5 6 7 8 9 10
 do
     ./serial 23 5000000 | grep "^csv" >> resultados/speedup.csv
 
