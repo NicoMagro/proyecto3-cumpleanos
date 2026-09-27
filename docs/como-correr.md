@@ -1,7 +1,5 @@
 # Como compilar y correr
 
-No hace falta Makefile: son dos comandos.
-
 ## Compilar
 
 ```bash
