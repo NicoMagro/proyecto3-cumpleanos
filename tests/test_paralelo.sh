@@ -7,7 +7,7 @@
 cd "$(dirname "$0")/.."
 
 echo "Compilando..."
-cc src/cumpleanos.c src/serial.c -o serial || exit 1
+mpicc src/cumpleanos.c src/serial.c -o serial || exit 1
 mpicc src/cumpleanos.c src/paralelo.c -o paralelo || exit 1
 
 echo ""

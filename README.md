@@ -27,7 +27,7 @@ entre varios procesos con MPI.
 ## Como usarlo
 
 ```bash
-cc src/cumpleanos.c src/serial.c -o serial
+mpicc src/cumpleanos.c src/serial.c -o serial
 mpicc src/cumpleanos.c src/paralelo.c -o paralelo
 
 ./serial 23 1000000
@@ -55,10 +55,10 @@ mediana de 3 corridas):
 
 | Procesos | Tiempo | Speedup | Eficiencia |
 |---|---|---|---|
-| 1 | 1.327 s | 1.00 | 1.00 |
-| 2 | 0.670 s | 1.98 | 0.99 |
-| 4 | 0.330 s | 4.02 | 1.01 |
-| 6 | 0.222 s | 5.98 | 1.00 |
-| 8 | 0.200 s | 6.63 | 0.83 |
+| 1 | 1.330 s | 1.00 | 1.00 |
+| 2 | 0.662 s | 2.01 | 1.00 |
+| 4 | 0.338 s | 3.93 | 0.98 |
+| 6 | 0.230 s | 5.78 | 0.96 |
+| 8 | 0.196 s | 6.79 | 0.85 |
 
 Falta correr lo mismo en las otras dos notebooks y en el servidor.

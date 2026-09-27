@@ -5,7 +5,7 @@ No hace falta Makefile: son dos comandos.
 ## Compilar
 
 ```bash
-cc src/cumpleanos.c src/serial.c -o serial
+mpicc src/cumpleanos.c src/serial.c -o serial
 mpicc src/cumpleanos.c src/paralelo.c -o paralelo
 ```
 

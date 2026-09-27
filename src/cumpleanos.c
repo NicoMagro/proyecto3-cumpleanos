@@ -3,12 +3,12 @@
 
 long simular_grupos(int k, long cantidad, unsigned int semilla)
 {
-    int cumpleanios[DIAS];   /* cumpleanios[d] = 1 si alguien cumple el dia d */
+    int cumpleanios[DIAS]; /* cumpleanios[d] = 1 si alguien cumple el dia d */
     long con_coincidencia = 0;
     long g;
     int i, dia, hay_coincidencia;
 
-    srand(semilla);   /* cada proceso usa una semilla distinta */
+    srand(semilla); /* cada proceso usa una semilla distinta */
 
     for (g = 0; g < cantidad; g++)
     {
@@ -76,11 +76,6 @@ double probabilidad_teorica(int k)
 
        Como las personas son independientes entre si, para que NINGUNA
        choque hay que multiplicar todas esas probabilidades.
-
-       Ojo con el orden de la cuenta: primero se multiplica por
-       sin_coincidencia, que es un double. Si se escribiera
-       ((DIAS - i) / DIAS) se dividirian dos enteros y C haria division
-       entera: 364/365 daria 0 en lugar de 0.9972.
     */
     for (i = 0; i < k; i++)
         sin_coincidencia = sin_coincidencia * (DIAS - i) / DIAS;
