@@ -1,0 +1,7 @@
+Notebook de Nicolas
+
+Apple M2 Pro
+Nucleos fisicos: 10
+Nucleos logicos: 10
+Sistema: Darwin 25.5.0 arm64
+mpirun (Open MPI) 5.0.8

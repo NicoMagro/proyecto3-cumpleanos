@@ -1,0 +1,9 @@
+# Programas compilados
+serial
+paralelo
+test
+*.o
+
+# Sistema
+.DS_Store
+__pycache__/
