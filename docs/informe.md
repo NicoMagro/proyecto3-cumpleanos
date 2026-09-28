@@ -109,14 +109,43 @@ sea proporcional a K y no a K².
 ### Números pseudoaleatorios
 
 Los números que genera `rand()` no son realmente aleatorios sino
-**pseudoaleatorios**: a partir de una semilla, la secuencia queda
-completamente determinada. Esto es deseable en un experimento numérico, porque
-permite que cualquiera reproduzca exactamente los mismos resultados.
+**pseudoaleatorios**: la función aplica una fórmula matemática al número
+anterior, de modo que a partir de una semilla toda la secuencia queda
+determinada. Esto, lejos de ser un defecto, es deseable en un experimento
+numérico, porque permite que cualquiera reproduzca exactamente los mismos
+resultados.
 
-En la versión paralela cada proceso usa una semilla distinta
-(`12345 + rango`). Si todos usaran la misma, todos los procesos sortearían
-exactamente los mismos grupos y el resultado sería equivalente al de un solo
-proceso repetido varias veces, desperdiciando por completo el paralelismo.
+Sobre el manejo de las semillas se tomaron dos decisiones:
+
+**Una semilla distinta por proceso.** En la versión paralela cada proceso usa
+`12345 + rango`. Si todos usaran la misma, todos sortearían exactamente los
+mismos grupos y el resultado equivaldría al de un solo proceso repetido varias
+veces, desperdiciando por completo el paralelismo.
+
+**La misma semilla en todas las repeticiones.** Para medir tiempos, las diez
+ejecuciones de cada configuración simulan exactamente los mismos grupos. De
+esta manera la única variable que cambia entre repeticiones es la cantidad de
+procesos, que es precisamente lo que se quiere medir. Si cada repetición
+sorteara grupos distintos, la cantidad de trabajo variaría levemente (cuando
+un grupo presenta una coincidencia temprana, el algoritmo corta y sortea menos
+números) y no se podría atribuir la diferencia de tiempos únicamente al
+paralelismo. Como contrapartida, las repeticiones brindan diez mediciones de
+tiempo pero una sola muestra estadística de la probabilidad, por lo que el
+experimento de convergencia requiere variar la semilla explícitamente.
+
+**Limitación conocida de este esquema.** Las semillas asignadas a los procesos
+son consecutivas (12345, 12346, 12347, ...). Dos semillas contiguas producen
+secuencias que no son estadísticamente independientes entre sí, porque
+provienen de la misma fórmula evaluada desde puntos de partida muy próximos.
+En un método de Monte Carlo esto puede hacer que las muestras aporten menos
+información de la que su cantidad sugiere, y que la precisión real sea inferior
+a la esperada para T simulaciones. En las mediciones realizadas el efecto no se
+manifiesta: con 2.000.000 de grupos la estimación difiere del valor teórico en
+3 diezmilésimas. Se deja constancia de todos modos porque se trata de una
+observación empírica y no de una verificación formal de independencia. La
+solución habitual consiste en separar las semillas entre sí, por ejemplo
+`12345 + rango * 7919`, o bien emplear un generador diseñado específicamente
+para ejecución paralela.
 
 ## 4. Implementación paralela
 
@@ -264,5 +293,8 @@ afirmar:)_
   _birthday attack_).
 - **Semilla configurable por línea de comandos**, necesaria para el
   experimento de convergencia con repeticiones independientes.
+- **Separar las semillas de los procesos** (por ejemplo `12345 + rango * 7919`)
+  y verificar la independencia de las secuencias comparando la estimación que
+  produce cada semilla por separado.
 - **Balance de carga dinámico** para máquinas con núcleos de distinta
   velocidad, en lugar del reparto estático actual.
