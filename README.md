@@ -48,7 +48,7 @@ Mas detalles y los comandos de los experimentos en [docs/como-correr.md](docs/co
 | `docs/` | Informe, roadmap y como correr todo |
 | `resultados/` | Los CSV y los graficos de cada maquina |
 
-## Resultado que ya tenemos
+## Resultados que ya tenemos
 
 Speedup medido en la notebook de Nicolas (2 millones de grupos, K=23,
 mediana de 10 corridas):
@@ -61,4 +61,15 @@ mediana de 10 corridas):
 | 6 | 0.233 s | 5.68 | 0.95 |
 | 8 | 0.205 s | 6.47 | 0.81 |
 
-Falta correr lo mismo en las otras dos notebooks y en el servidor.
+Speedup medido en la desktop de Sergio (2 millones de grupos, K=23,
+mediana de 10 corridas):
+
+| Procesos | Mediana | Speedup | Eficiencia |
+|---|---|---|---|
+| 1 | 0.593 s | 1.00 | 1.00 |
+| 2 | 0.286 s | 2.08 | 1.04 |
+| 4 | 0.145 s | 4.08 | 1.02 |
+| 6 | 0.098 s | 6.06 | 1.01 |
+| 8 | 0.080 s | 7.47 | 0.93 |
+
+Falta correr lo mismo en la notebook restante y en el servidor.
