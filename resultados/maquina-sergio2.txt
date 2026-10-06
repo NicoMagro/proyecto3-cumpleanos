@@ -1,0 +1,8 @@
+Desktop de Sergio 2
+
+Intel(R) Core(TM) i5-4440 CPU @ 3.10GHz
+Nucleos fisicos: 4
+Nucleos logicos: 4
+Sistema: Ubuntu 18.04.6 LTS
+mpirun (Open MPI) 2.1.1
+
