@@ -1,11 +1,11 @@
 /*
-   Paradoja del cumpleanios - version PARALELA con MPI
+   Paradoja del cumpleanios - version PARALELA ESTATICA con MPI
 
-   Los grupos a simular se reparten entre los procesos. Cada proceso cuenta
-   sus coincidencias y al final se suman todas con MPI_Reduce.
+   Los grupos a simular se reparten de forma fija y equitativa entre los procesos.
+   Cada proceso cuenta sus coincidencias y al final se suman todas con MPI_Reduce.
 
-   Compilar:  mpicc src/cumpleanos.c src/paralelo.c -o paralelo
-   Ejecutar:  mpirun -n 4 ./paralelo 23 1000000
+   Compilar:  mpicc src/cumpleanos.c src/paralelo-estatico.c -o paralelo-estatico
+   Ejecutar:  mpirun -n 4 ./paralelo-estatico 23 1000000
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,10 +38,11 @@ int main(int argc, char **argv)
     /* Repartimos los grupos entre los procesos */
     mi_cantidad = cantidad / n_procesos;
 
-    /* Si la division no es exacta, el proceso 0 hace los grupos que sobran.
-       Asi la suma de todas las partes da siempre la cantidad pedida. */
-    if (rango == 0)
-        mi_cantidad = mi_cantidad + (cantidad % n_procesos);
+    
+    /* Si la division no es exacta, el proceso que tenga rango menor a la 
+       cantidad de grupos que sobran, aumenta su cantidad en 1*/
+    if (rango < cantidad % n_procesos)
+        mi_cantidad++;
 
     /* Todos arrancan a medir al mismo tiempo */
     MPI_Barrier(MPI_COMM_WORLD);
@@ -80,8 +81,8 @@ int main(int argc, char **argv)
         printf("Error                  : %.4f\n", p_simulada - p_teorica);
         printf("Tiempo                 : %.3f segundos\n", tiempo);
 
-        printf("csv,%d,%ld,%d,%.6f,%.6f,%.3f\n",
-               k, cantidad, n_procesos, p_simulada, p_teorica, tiempo);
+        printf("csv,%d,%ld,%d,0,%.6f,%.6f,%.3f\n",
+            k, cantidad, n_procesos, p_simulada, p_teorica, tiempo);
     }
 
     MPI_Finalize();

@@ -1,6 +1,8 @@
 # Programas compilados
 serial
 paralelo
+paralelo-estatico
+paralelo-dinamico
 test
 *.o
 

@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     printf("Tiempo                 : %.3f segundos\n", tiempo);
 
     /* Linea con formato CSV, para juntar resultados de varias corridas */
-    printf("csv,%d,%ld,1,%.6f,%.6f,%.3f\n",
+    printf("csv,%d,%ld,1,0,%.6f,%.6f,%.3f\n",
            k, cantidad, p_simulada, p_teorica, tiempo);
 
     MPI_Finalize();
