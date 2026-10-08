@@ -157,19 +157,33 @@ resultado anterior. Esta independencia total convierte al problema en uno de
 los llamados **vergonzosamente paralelos**, donde la parte serial es casi nula
 y, según la ley de Amdahl, el speedup alcanzable es prácticamente lineal.
 
-### Distribución del trabajo
+### Distribución del trabajo: versión estática (`src/paralelo-estatico.c`)
 
 Los T grupos se reparten en partes iguales entre los P procesos:
 
 ```c
 mi_cantidad = cantidad / n_procesos;
-if (rango == 0)
-    mi_cantidad = mi_cantidad + (cantidad % n_procesos);
+if (rango < cantidad % n_procesos)
+    mi_cantidad++;
 ```
 
-Cuando la división no es exacta, el proceso 0 se hace cargo de los grupos
+Cuando la división no es exacta, los primeros procesos se hacen cargo de los grupos
 sobrantes. Sin esa corrección se perderían hasta P−1 grupos y la suma de las
-partes no daría el total pedido.
+partes no daría el total pedido. Cada proceso simula sus grupos con la semilla
+`12345 + rango` sin comunicarse con los demás.
+
+### Distribución del trabajo: versión dinámica (`src/paralelo-dinamico.c`)
+
+Implementa un esquema **maestro-trabajadores**:
+- El **proceso 0 (maestro)** no simula: reparte bloques de grupos a pedido.
+- Los **procesos 1 a P−1 (trabajadores)** piden un bloque, lo simulan y vuelven
+  a pedir otro hasta que no queda trabajo.
+
+Para que la simulación sea determinista y reproducible, la semilla no depende
+del proceso sino del bloque: cada bloque usa `12345 + id_bloque`.
+
+El tamaño de bloque es configurable por línea de comandos. Si no se indica, el
+código asigna automáticamente unos 20 bloques por trabajador.
 
 ### Recolección de resultados
 
@@ -258,27 +272,48 @@ Observaciones:
   menores al 1%) indica que las mediciones fueron estables y que no hubo
   corridas anómalas que distorsionen las conclusiones.
 
-### 5.4 Comparación entre sistemas
+### 5.4 Comparación: Estático vs Dinámico
 
-_(Pendiente: correr el experimento 3 en las otras dos notebooks y en el
-servidor de la facultad)_
+Para comparar ambas estrategias se midieron en el desktop de Sergio (Ryzen 7 9800X3D, 8 núcleos) y en un cluster (AMD EPYC, hasta 96 procesos). Para el dinámico se tomó el mejor tamaño de bloque encontrado:
+
+**Desktop de Sergio (8 núcleos, tiempo serial = 0.601 s):**
+
+| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
+| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
+| 2        | 0.288           | 2.08         | 1.04       | 0.571           | 1.05         | 0.53       | 200.000      |
+| 4        | 0.147           | 4.09         | 1.02       | 0.192           | 3.13         | 0.78       | 4.255        |
+| 6        | 0.098           | 6.14         | 1.02       | 0.115           | 5.23         | 0.87       | 425          |
+| 8        | 0.076           | 7.91         | 0.99       | 0.084           | 7.16         | 0.90       | 425          |
+
+**Cluster (AMD EPYC, tiempo serial = 2.319 s):**
+
+| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
+| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
+| 2        | 1.156           | 2.01         | 1.00       | 2.309           | 1.00         | 0.50       | 200.000      |
+| 4        | 0.580           | 4.00         | 1.00       | 0.774           | 2.99         | 0.75       | 4.255        |
+| 8        | 0.291           | 7.96         | 0.99       | 0.333           | 6.97         | 0.87       | 425          |
+| 16       | 0.146           | 15.89        | 0.99       | 0.156           | 14.87        | 0.93       | 425          |
+| 32       | 0.074           | 31.34        | 0.98       | 0.076           | 30.52        | 0.95       | 425          |
+| 64       | 0.037           | 62.69        | 0.98       | 0.038           | 61.04        | 0.95       | 425          |
+| 96       | 0.026           | 89.21        | 0.93       | 0.026           | 87.53        | 0.91       | 425          |
+
+Observaciones:
+
+- **El estático es superior al dinámico en todos los casos:** El problema es naturalmente homogéneo: cada grupo simula 23 personas y toma casi el mismo tiempo, por lo que no hay desbalance de carga que el dinámico pueda corregir. El estático reparte todo de entrada sin comunicación intermedia.
+- **El costo del maestro dedicado:** En el dinámico, el proceso 0 no computa, solo coordina. Con 2 procesos solo 1 trabaja, por eso la eficiencia da ~50%. Con 4 procesos trabajan 3 (máximo teórico 75%).
+- **Por qué el dinámico mejora con más procesos:** Al aumentar la cantidad de procesos, perder 1 proceso como maestro pesa mucho menos (en 8 procesos se pierde 1/8, en 64 solo 1/64). Por eso la eficiencia del dinámico sube del 50% con 2 procesos a más del 95% con 32 o 64 procesos, acercándose al estático.
+- **Efecto del tamaño de bloque:** Si el bloque es muy chico (ej. 1 o 4 grupos), se generan millones de mensajes y el maestro se satura por la comunicación. Si el bloque es muy grande (ej. 1.000.000), los trabajadores terminan rápido y quedan ociosos esperando al último. El rango óptimo está en el medio, entre 400 y 4.255 grupos por bloque (ver `bloques.png`).
+- **La precisión no depende del tamaño de bloque:** En `bloques_precision.png` se observa que el error frente al valor teórico es prácticamente idéntico con cualquier bloque. Esto se debe a que la cantidad total de grupos simulados es la misma (2.000.000) y cada bloque tiene su propia semilla (`12345 + id_bloque`), por lo que terminan siendo exactamente los mismos cálculos divididos de otra forma.
 
 ## 6. Conclusiones
 
-_(Pendiente hasta completar los experimentos 1, 2 y 4. Lo que ya se puede
-afirmar:)_
-
-1. La simulación reproduce el valor teórico con buena precisión: con 2.000.000
-   de grupos y K=23 se obtuvo una probabilidad estimada de 0.5070 frente al
-   valor exacto 0.5073, con un error del orden de 0.0003.
-2. El problema escala muy bien hasta la cantidad de núcleos físicos de alto
-   rendimiento disponibles, alcanzando un speedup de 5.68 con 6 procesos
-   (eficiencia 0.95).
-3. Aumentar la cantidad de procesos más allá de los núcleos rápidos disponibles
-   sigue mejorando el tiempo total, pero con eficiencia decreciente.
-4. El speedup obtenido es notablemente mejor que el de problemas con
-   comunicación intensa, como el producto escalar del TP1, porque aquí la
-   comunicación total se limita a un entero por proceso.
+1. La simulación reproduce el valor teórico con buena precisión: con 2.000.000 de grupos y K=23 se obtuvo una probabilidad estimada de 0.5070 frente al valor exacto 0.5073, con un error del orden de 0.0003, independiente del tamaño de bloque o esquema utilizado.
+2. El problema escala de forma casi lineal en la versión estática hasta la cantidad de núcleos físicos disponibles, alcanzando un speedup de 7.91 con 8 procesos en el Ryzen de Sergio (eficiencia 0.99) y 62.69 con 64 procesos en el cluster AMD EPYC (eficiencia 0.98).
+3. Aumentar la cantidad de procesos más allá de los núcleos físicos disponibles (como 96 procesos en el cluster de 64 núcleos) sigue reduciendo el tiempo total, pero con eficiencia decreciente (cae a 0.93) por contención de recursos.
+4. El speedup obtenido en el reparto estático es notablemente mejor que el de problemas con comunicación intensa, como el producto escalar del TP1, porque aquí la comunicación se reduce a un único entero por proceso al final de la corrida.
+5. El paralelismo estático es superior al dinámico en este problema: al ser una carga naturalmente homogénea, el dinámico no aporta ventajas y penaliza con la pérdida de un proceso maestro más la sobrecarga de mensajes continuos.
+6. En el dinámico, la eficiencia arranca baja (~50% con 2 procesos al haber un solo trabajador), pero crece con la cantidad de procesos a medida que el costo del maestro se diluye entre más trabajadores.
+7. El tamaño de bloque en el dinámico presenta un compromiso claro: bloques muy chicos saturan al maestro de mensajes y bloques muy grandes desbalancean la carga al final.
 
 ## 7. Mejoras recomendadas para el futuro
 
