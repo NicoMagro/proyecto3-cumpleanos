@@ -1,0 +1,7 @@
+Cluster
+
+AMD EPYC 7B12 64-Core Processor
+Nucleos fisicos: 64
+Nucleos logicos: 64
+Sistema: Ubuntu 24.04.3 LTS
+mpirun (Open MPI) 4.1.6
