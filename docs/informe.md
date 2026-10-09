@@ -291,17 +291,25 @@ Para comparar ambas estrategias se midieron en el desktop de Sergio (Ryzen 7 980
 | -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
 | 2        | 1.156           | 2.01         | 1.00       | 2.309           | 1.00         | 0.50       | 200.000      |
 | 4        | 0.580           | 4.00         | 1.00       | 0.774           | 2.99         | 0.75       | 4.255        |
+| 6        | 0.388           | 5.98         | 1.00       | 0.465           | 4.99         | 0.83       | 4.255        |
 | 8        | 0.291           | 7.96         | 0.99       | 0.333           | 6.97         | 0.87       | 425          |
+| 12       | 0.194           | 11.96        | 1.00       | 0.213           | 10.89        | 0.91       | 425          |
 | 16       | 0.146           | 15.89        | 0.99       | 0.156           | 14.87        | 0.93       | 425          |
+| 24       | 0.099           | 23.55        | 0.98       | 0.102           | 22.74        | 0.95       | 425          |
 | 32       | 0.074           | 31.34        | 0.98       | 0.076           | 30.52        | 0.95       | 425          |
+| 48       | 0.050           | 46.39        | 0.97       | 0.050           | 46.39        | 0.97       | 425          |
 | 64       | 0.037           | 62.69        | 0.98       | 0.038           | 61.04        | 0.95       | 425          |
 | 96       | 0.026           | 89.21        | 0.93       | 0.026           | 87.53        | 0.91       | 425          |
 
 Observaciones:
 
-- **El estático es superior al dinámico en todos los casos:** El problema es naturalmente homogéneo: cada grupo simula 23 personas y toma casi el mismo tiempo, por lo que no hay desbalance de carga que el dinámico pueda corregir. El estático reparte todo de entrada sin comunicación intermedia.
+- **El estático es superior al dinámico en casi todos los casos:** El problema es naturalmente homogéneo: cada grupo simula 23 personas y toma casi el mismo tiempo, por lo que no hay desbalance de carga que el dinámico pueda corregir. El estático reparte todo de entrada sin comunicación intermedia.
 - **El costo del maestro dedicado:** En el dinámico, el proceso 0 no computa, solo coordina. Con 2 procesos solo 1 trabaja, por eso la eficiencia da ~50%. Con 4 procesos trabajan 3 (máximo teórico 75%).
-- **Por qué el dinámico mejora con más procesos:** Al aumentar la cantidad de procesos, perder 1 proceso como maestro pesa mucho menos (en 8 procesos se pierde 1/8, en 64 solo 1/64). Por eso la eficiencia del dinámico sube del 50% con 2 procesos a más del 95% con 32 o 64 procesos, acercándose al estático.
+- **Por qué el dinámico mejora, empata en 48 procesos y decae luego (64 y 96 procesos):**
+  Al aumentar la cantidad de procesos, el dinámico mejora porque perder 1 proceso como maestro pesa cada vez menos (pasa de perder el 50% con 2 procesos a solo el 2.1% con 48). Justo en 48 procesos se alcanza un equilibrio óptimo: el costo del maestro es mínimo, los 4.706 bloques de tamaño 425 se dividen casi de forma exacta entre los 47 trabajadores (~100 bloques por trabajador), y el maestro aún no se satura despachando pedidos, empatando al estático en 0.050 s.
+  Sin embargo, con 64 y 96 procesos el dinámico vuelve a quedar levemente por detrás del estático por dos razones:
+  1. *Contención en el maestro:* La corrida entera dura menos de 40 milisegundos. Tener 63 o 95 trabajadores bombardeando a un único proceso central con pedidos concurrentes satura la cola de mensajes del maestro, obligando a los trabajadores a esperar turno para recibir su bloque.
+  2. *Latencia de interconexión:* En clusters de alto rendimiento como el del CCAD, al solicitar 96 núcleos la asignación abarca múltiples sockets o dominios de memoria (e interconexión de red si cruza nodos). Mientras que en el estático los procesos no se comunican y trabajan 100% en memoria local, en el dinámico los miles de mensajes de asignación deben cruzar los enlaces del cluster hacia el nodo del maestro, sumando latencia.
 - **Efecto del tamaño de bloque:** Si el bloque es muy chico (ej. 1 o 4 grupos), se generan millones de mensajes y el maestro se satura por la comunicación. Si el bloque es muy grande (ej. 1.000.000), los trabajadores terminan rápido y quedan ociosos esperando al último. El rango óptimo está en el medio, entre 400 y 4.255 grupos por bloque (ver `bloques.png`).
 - **La precisión no depende del tamaño de bloque:** En `bloques_precision.png` se observa que el error frente al valor teórico es prácticamente idéntico con cualquier bloque. Esto se debe a que la cantidad total de grupos simulados es la misma (2.000.000) y cada bloque tiene su propia semilla (`12345 + id_bloque`), por lo que terminan siendo exactamente los mismos cálculos divididos de otra forma.
 
@@ -309,7 +317,7 @@ Observaciones:
 
 1. La simulación reproduce el valor teórico con buena precisión: con 2.000.000 de grupos y K=23 se obtuvo una probabilidad estimada de 0.5070 frente al valor exacto 0.5073, con un error del orden de 0.0003, independiente del tamaño de bloque o esquema utilizado.
 2. El problema escala de forma casi lineal en la versión estática hasta la cantidad de núcleos físicos disponibles, alcanzando un speedup de 7.91 con 8 procesos en el Ryzen de Sergio (eficiencia 0.99) y 62.69 con 64 procesos en el cluster AMD EPYC (eficiencia 0.98).
-3. Aumentar la cantidad de procesos más allá de los núcleos físicos disponibles (como 96 procesos en el cluster de 64 núcleos) sigue reduciendo el tiempo total, pero con eficiencia decreciente (cae a 0.93) por contención de recursos.
+3. A gran escala (64 y 96 procesos en el cluster) el tiempo total sigue reduciéndose hasta 0.026 s, pero con una leve caída en la eficiencia (0.93 en estático y 0.91 en dinámico) debido a la latencia de comunicación entre sockets/nodos y la contención en el paso de mensajes.
 4. El speedup obtenido en el reparto estático es notablemente mejor que el de problemas con comunicación intensa, como el producto escalar del TP1, porque aquí la comunicación se reduce a un único entero por proceso al final de la corrida.
 5. El paralelismo estático es superior al dinámico en este problema: al ser una carga naturalmente homogénea, el dinámico no aporta ventajas y penaliza con la pérdida de un proceso maestro más la sobrecarga de mensajes continuos.
 6. En el dinámico, la eficiencia arranca baja (~50% con 2 procesos al haber un solo trabajador), pero crece con la cantidad de procesos a medida que el costo del maestro se diluye entre más trabajadores.

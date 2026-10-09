@@ -75,7 +75,7 @@ sp_dinamico = []
 ef_dinamico = []
 
 print("\n--- DINAMICO (Mejor bloque por proceso) ---")
-print("procesos | mejor bloque | tiempo (s) | speedup | eficiencia")
+print("procesos | mejor tamanio bloque | tiempo (s) | speedup | eficiencia")
 for p in procs_dinamico:
     mejor_tiempo = float('inf')
     mejor_bloque = -1
@@ -161,10 +161,9 @@ for p in sorted(datos_bloques):
     trabajadores = max(p - 1, 1)
     mejor = min(datos_bloques[p], key=lambda f: f[2])
     print(f"\nProcesos: {p} ({trabajadores} trabajadores)")
-    print("bloques tot. | bloques/trab. | tam. bloque | tiempo (s) | extra/bloque (us)")
+    print("bloques tot. | bloques/trab. | tam. bloque | tiempo (s)")
     for n, b, t in datos_bloques[p]:
-        extra = (t - mejor[2]) / n * 1e6
-        print(f"{n:12d} | {n/trabajadores:13.1f} | {b:11d} | {t:10.3f} | {max(extra, 0):17.2f}")
+        print(f"{n:12d} | {n/trabajadores:13.1f} | {b:11d} | {t:10.3f}")
     print(f"  -> mejor: {mejor[0]} bloques (tam. {mejor[1]}) con {mejor[2]:.3f} s")
 
 # ---------------------------------------------------------------
@@ -188,7 +187,7 @@ plt.xlabel("Cantidad total de bloques (escala log)")
 plt.ylabel("Tiempo total del programa (s, escala log)")
 plt.title("Tiempo total segun cantidad de bloques")
 plt.grid(alpha=0.3, which="both")
-plt.legend()
+plt.legend(loc='lower left', framealpha=0.4, fontsize='x-small', markerscale=0.8)
 plt.savefig("resultados/bloques.png", dpi=150, bbox_inches="tight")
 plt.close()
 print("\nGuardado resultados/bloques.png")
