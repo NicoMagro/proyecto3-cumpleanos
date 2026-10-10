@@ -274,52 +274,97 @@ Observaciones:
 
 ### 5.4 Comparación: Estático vs Dinámico
 
-Para comparar ambas estrategias se midieron en el desktop de Sergio (Ryzen 7 9800X3D, 8 núcleos) y en un cluster (AMD EPYC, hasta 96 procesos). Para el dinámico se tomó el mejor tamaño de bloque encontrado:
+Para comparar ambas estrategias se midieron en tres escenarios:
+1. **Desktop de Sergio (SMT desactivado / 8 núcleos físicos, 8 hilos):** AMD Ryzen 7 9800X3D.
+2. **Desktop de Sergio (SMT activado / 8 núcleos físicos, 16 hilos):** AMD Ryzen 7 9800X3D.
+3. **Cluster CCAD UNC (2 sockets AMD EPYC 7B12 de 64 núcleos c/u = 128 núcleos totales, entorno JupyterLab limitado a 96 núcleos):** hasta 192 procesos.
 
-**Desktop de Sergio (8 núcleos, tiempo serial = 0.601 s):**
+Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada cantidad de procesos.
 
-| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
-| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
-| 2        | 0.288           | 2.08         | 1.04       | 0.571           | 1.05         | 0.53       | 200.000      |
-| 4        | 0.147           | 4.09         | 1.02       | 0.192           | 3.13         | 0.78       | 4.255        |
-| 6        | 0.098           | 6.14         | 1.02       | 0.115           | 5.23         | 0.87       | 425          |
-| 8        | 0.076           | 7.91         | 0.99       | 0.084           | 7.16         | 0.90       | 425          |
-
-**Cluster (AMD EPYC, tiempo serial = 2.319 s):**
+#### Caso 1: Desktop de Sergio con SMT desactivado (8 núcleos físicos / 8 hilos, T_serial = 0.601 s)
 
 | Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
 | -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
-| 2        | 1.156           | 2.01         | 1.00       | 2.309           | 1.00         | 0.50       | 200.000      |
-| 4        | 0.580           | 4.00         | 1.00       | 0.774           | 2.99         | 0.75       | 4.255        |
+| 2        | 0.286           | 2.10         | 1.05       | 0.572           | 1.05         | 0.53       | 42.553       |
+| 4        | 0.146           | 4.12         | 1.03       | 0.192           | 3.13         | 0.78       | 4.255        |
+| 6        | 0.096           | 6.26         | 1.04       | 0.115           | 5.23         | 0.87       | 425          |
+| 7        | 0.082           | 7.33         | 1.05       | 0.096           | 6.26         | 0.89       | 425          |
+| 8        | 0.072           | 8.35         | 1.04       | 0.082           | 7.33         | 0.92       | 425          |
+| 9        | 0.096           | 6.26         | 0.70       | 0.083           | 7.24         | 0.80       | 425          |
+| 10       | 0.087           | 6.91         | 0.69       | 0.084           | 7.15         | 0.72       | 425          |
+| 12       | 0.086           | 6.99         | 0.58       | 0.083           | 7.24         | 0.60       | 4.255        |
+| 14       | 0.089           | 6.75         | 0.48       | 0.082           | 7.33         | 0.52       | 425          |
+| 16       | 0.087           | 6.91         | 0.43       | 0.083           | 7.24         | 0.45       | 4.255        |
+| 20       | 0.096           | 6.26         | 0.31       | 0.083           | 7.24         | 0.36       | 4.255        |
+| 24       | 0.099           | 6.07         | 0.25       | 0.087           | 6.91         | 0.29       | 425          |
+
+#### Caso 2: Desktop de Sergio con SMT activado (8 núcleos físicos / 16 hilos lógicos, T_serial = 0.601 s)
+
+| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
+| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
+| 2        | 0.287           | 2.09         | 1.05       | 0.573           | 1.05         | 0.52       | 4.255        |
+| 4        | 0.146           | 4.12         | 1.03       | 0.192           | 3.13         | 0.78       | 425          |
+| 6        | 0.101           | 5.95         | 0.99       | 0.116           | 5.18         | 0.86       | 4.255        |
+| 7        | 0.088           | 6.83         | 0.98       | 0.097           | 6.20         | 0.89       | 425          |
+| 8        | 0.082           | 7.33         | 0.92       | 0.087           | 6.91         | 0.86       | 425          |
+| 9        | 0.083           | 7.24         | 0.80       | 0.080           | 7.51         | 0.83       | 425          |
+| 10       | 0.078           | 7.71         | 0.77       | 0.074           | 8.12         | 0.81       | 425          |
+| 12       | 0.067           | 8.97         | 0.75       | 0.064           | 9.39         | 0.78       | 425          |
+| 14       | 0.058           | 10.36        | 0.74       | 0.058           | 10.36        | 0.74       | 4.255        |
+| 16       | 0.052           | 11.56        | 0.72       | 0.055           | 10.93        | 0.68       | 4.255        |
+| 17       | 0.064           | 9.39         | 0.55       | 0.055           | 10.93        | 0.64       | 4.255        |
+| 20       | 0.062           | 9.69         | 0.48       | 0.054           | 11.13        | 0.56       | 425          |
+| 24       | 0.063           | 9.54         | 0.40       | 0.054           | 11.13        | 0.46       | 425          |
+
+#### Caso 3: Cluster CCAD UNC (Dual AMD EPYC 7B12, límite 96 núcleos asignados, T_serial = 2.319 s)
+
+| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
+| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
+| 2        | 1.157           | 2.00         | 1.00       | 2.310           | 1.00         | 0.50       | 200.000      |
+| 4        | 0.580           | 4.00         | 1.00       | 0.775           | 2.99         | 0.75       | 4.255        |
 | 6        | 0.388           | 5.98         | 1.00       | 0.465           | 4.99         | 0.83       | 4.255        |
-| 8        | 0.291           | 7.96         | 0.99       | 0.333           | 6.97         | 0.87       | 425          |
-| 12       | 0.194           | 11.96        | 1.00       | 0.213           | 10.89        | 0.91       | 425          |
-| 16       | 0.146           | 15.89        | 0.99       | 0.156           | 14.87        | 0.93       | 425          |
-| 24       | 0.099           | 23.55        | 0.98       | 0.102           | 22.74        | 0.95       | 425          |
-| 32       | 0.074           | 31.34        | 0.98       | 0.076           | 30.52        | 0.95       | 425          |
-| 48       | 0.050           | 46.39        | 0.97       | 0.050           | 46.39        | 0.97       | 425          |
-| 64       | 0.037           | 62.69        | 0.98       | 0.038           | 61.04        | 0.95       | 425          |
-| 96       | 0.026           | 89.21        | 0.93       | 0.026           | 87.53        | 0.91       | 425          |
+| 8        | 0.292           | 7.94         | 0.99       | 0.333           | 6.96         | 0.87       | 425          |
+| 12       | 0.194           | 11.95        | 1.00       | 0.213           | 10.89        | 0.91       | 425          |
+| 16       | 0.146           | 15.88        | 0.99       | 0.156           | 14.87        | 0.93       | 425          |
+| 24       | 0.099           | 23.42        | 0.98       | 0.102           | 22.74        | 0.95       | 425          |
+| 32       | 0.074           | 31.34        | 0.98       | 0.076           | 30.51        | 0.95       | 425          |
+| 48       | 0.050           | 46.38        | 0.97       | 0.050           | 46.38        | 0.97       | 425          |
+| 64       | 0.037           | 62.68        | 0.98       | 0.038           | 61.03        | 0.95       | 425          |
+| 96       | 0.026           | 89.19        | 0.93       | 0.027           | 85.89        | 0.89       | 425          |
+| 97       | 0.027           | 85.89        | 0.89       | 0.027           | 85.89        | 0.89       | 425          |
+| 128      | 0.034           | 68.21        | 0.53       | 0.031           | 74.81        | 0.58       | 425          |
+| 160      | 0.031           | 74.81        | 0.47       | 0.029           | 79.97        | 0.50       | 425          |
+| 192      | 0.036           | 64.42        | 0.34       | 0.026           | 89.19        | 0.46       | 425          |
 
-Observaciones:
+Observaciones y análisis detallado:
 
-- **El estático es superior al dinámico en casi todos los casos:** El problema es naturalmente homogéneo: cada grupo simula 23 personas y toma casi el mismo tiempo, por lo que no hay desbalance de carga que el dinámico pueda corregir. El estático reparte todo de entrada sin comunicación intermedia.
-- **El costo del maestro dedicado:** En el dinámico, el proceso 0 no computa, solo coordina. Con 2 procesos solo 1 trabaja, por eso la eficiencia da ~50%. Con 4 procesos trabajan 3 (máximo teórico 75%).
-- **Por qué el dinámico mejora, empata en 48 procesos y decae luego (64 y 96 procesos):**
-  Al aumentar la cantidad de procesos, el dinámico mejora porque perder 1 proceso como maestro pesa cada vez menos (pasa de perder el 50% con 2 procesos a solo el 2.1% con 48). Justo en 48 procesos se alcanza un equilibrio óptimo: el costo del maestro es mínimo, los 4.706 bloques de tamaño 425 se dividen casi de forma exacta entre los 47 trabajadores (~100 bloques por trabajador), y el maestro aún no se satura despachando pedidos, empatando al estático en 0.050 s.
-  Sin embargo, con 64 y 96 procesos el dinámico vuelve a quedar levemente por detrás del estático por dos razones:
-  1. *Contención en el maestro:* La corrida entera dura menos de 40 milisegundos. Tener 63 o 95 trabajadores bombardeando a un único proceso central con pedidos concurrentes satura la cola de mensajes del maestro, obligando a los trabajadores a esperar turno para recibir su bloque.
-  2. *Latencia de interconexión:* En clusters de alto rendimiento como el del CCAD, al solicitar 96 núcleos la asignación abarca múltiples sockets o dominios de memoria (e interconexión de red si cruza nodos). Mientras que en el estático los procesos no se comunican y trabajan 100% en memoria local, en el dinámico los miles de mensajes de asignación deben cruzar los enlaces del cluster hacia el nodo del maestro, sumando latencia.
-- **Efecto del tamaño de bloque:** Si el bloque es muy chico (ej. 1 o 4 grupos), se generan millones de mensajes y el maestro se satura por la comunicación. Si el bloque es muy grande (ej. 1.000.000), los trabajadores terminan rápido y quedan ociosos esperando al último. El rango óptimo está en el medio, entre 400 y 4.255 grupos por bloque (ver `bloques.png`).
-- **La precisión no depende del tamaño de bloque:** En `bloques_precision.png` se observa que el error frente al valor teórico es prácticamente idéntico con cualquier bloque. Esto se debe a que la cantidad total de grupos simulados es la misma (2.000.000) y cada bloque tiene su propia semilla (`12345 + id_bloque`), por lo que terminan siendo exactamente los mismos cálculos divididos de otra forma.
+- **Efecto de SMT (Simultaneous Multithreading / Hyper-Threading):**
+  - Con **SMT desactivado** (8 núcleos / 8 hilos), el mejor tiempo estático se obtiene exactamente en 8 procesos (0.072 s). A partir de 9 procesos el rendimiento estático empeora bruscamente (sube a ~0.096 s) debido al costo de cambio de contexto entre procesos que compiten por los mismos 8 núcleos físicos.
+  - Con **SMT activado** (8 núcleos / 16 hilos), el procesador aprovecha las burbujas en los pipelines de ejecución y alcanza un speedup de 11.56 con 16 procesos (0.052 s frente a 0.072 s sin SMT), logrando una mejora real de rendimiento del ~28%.
+- **Por qué sobreasignar procesos puede superar a la cantidad de hilos lógicos:**
+  - En el caso con SMT activado, en la versión dinámica el tiempo con 20 procesos (0.054 s) es incluso mejor que con 16 procesos (0.055 s).
+  - Asimismo, en el cluster CCAD limitado a 96 núcleos, en la versión dinámica con 192 procesos se alcanza un tiempo de **0.026 s**, superando los 0.027 s de 96 procesos y batiendo ampliamente a los 128 procesos (0.031 s).
+  - ¿Por qué ocurre esto si la intuición sugiere que 96 procesos debería ser el límite óptimo?
+    1. **Ocultamiento de latencia de red/comunicación:** En el dinámico, los procesos pasan una fracción de su tiempo bloqueados en llamadas MPI esperando que el maestro les despache un nuevo bloque. Si hay exactamente 96 procesos para 96 núcleos, cuando un proceso espera en MPI, su núcleo físico queda parcialmente ocioso. Al haber 192 procesos (2 procesos por núcleo asignado), mientras un proceso espera comunicación con el maestro, el planificador del sistema operativo conmuta al otro proceso en ese mismo núcleo para que siga computando de inmediato.
+    2. **Sobreasignación asimétrica en el maestro:** El proceso 0 (maestro) pasa la mayor parte del tiempo esperando solicitudes entrantes y no consume el 100% de CPU como un trabajador. Al sobreasignar, los núcleos dedicados a trabajadores tienen siempre trabajo disponible en cola.
+    3. **Resiliencia ante la cola del maestro a 128 vs 192 procesos:** Con 128 procesos, el balance entre cambio de contexto y espera no es uniforme (algunos núcleos tienen 1 proceso y otros 2, provocando jitter y desbalance). Con 192 procesos la asignación es exactamente 2 procesos por núcleo lógico asignado (192 / 96 = 2.0), lo que regulariza la carga en el scheduler y optimiza el solapamiento entre I/O MPI y cómputo.
+- **El comportamiento del estático frente a la sobreasignación:**
+  - En el estático, cada proceso tiene exactamente el mismo trabajo fijo y todos demandan el 100% de CPU continuamente sin esperas de red intermedias.
+  - Por esta razón, el estático **no tolera la sobreasignación**: en el cluster decae de 0.026 s (con 96) a 0.034 s (con 128) y 0.036 s (con 192). Al no haber esperas de red que ocultar, el cambio de contexto continuo entre procesos de cómputo puro solo agrega overhead. Por eso, en sobreasignación masiva (192 procesos), el dinámico (0.026 s) supera con claridad al estático (0.036 s).
+- **El empate en 48 procesos:**
+  - Hasta 48 procesos en el cluster, el estático es superior o empata. En 48 procesos ambos marcan exactamente 0.050 s, punto en el cual el costo del maestro (~2% de los recursos) se amortiza por completo y la cola de mensajes del maestro no experimenta contención.
+- **La precisión no depende del tamaño de bloque ni del hardware:**
+  - En todos los escenarios, la probabilidad estimada converge a ~0.5070 con 2.000.000 de grupos frente al valor teórico de 0.5073, confirmando que la partición en bloques y la concurrencia no alteran los resultados matemáticos.
 
 ## 6. Conclusiones
 
 1. La simulación reproduce el valor teórico con buena precisión: con 2.000.000 de grupos y K=23 se obtuvo una probabilidad estimada de 0.5070 frente al valor exacto 0.5073, con un error del orden de 0.0003, independiente del tamaño de bloque o esquema utilizado.
-2. El problema escala de forma casi lineal en la versión estática hasta la cantidad de núcleos físicos disponibles, alcanzando un speedup de 7.91 con 8 procesos en el Ryzen de Sergio (eficiencia 0.99) y 62.69 con 64 procesos en el cluster AMD EPYC (eficiencia 0.98).
-3. A gran escala (64 y 96 procesos en el cluster) el tiempo total sigue reduciéndose hasta 0.026 s, pero con una leve caída en la eficiencia (0.93 en estático y 0.91 en dinámico) debido a la latencia de comunicación entre sockets/nodos y la contención en el paso de mensajes.
-4. El speedup obtenido en el reparto estático es notablemente mejor que el de problemas con comunicación intensa, como el producto escalar del TP1, porque aquí la comunicación se reduce a un único entero por proceso al final de la corrida.
-5. El paralelismo estático es superior al dinámico en este problema: al ser una carga naturalmente homogénea, el dinámico no aporta ventajas y penaliza con la pérdida de un proceso maestro más la sobrecarga de mensajes continuos.
+2. El paralelismo estático escala de forma casi lineal y con eficiencia cercana al 100% mientras la cantidad de procesos se mantenga dentro de los núcleos físicos o hilos reales disponibles (speedup 8.35 con 8 núcleos en Sergio y 89.19 con 96 procesos en el cluster).
+3. **Impacto de SMT/Hyper-Threading:** Activar SMT en la máquina local permitió pasar de un speedup máximo de 8.35 a 11.56 (mejora de ~28%), confirmando que la simulación de Monte Carlo se beneficia del multihilo simultáneo para aprovechar ciclos ociosos del procesador.
+4. **Comportamiento en sobreasignación (más procesos que núcleos asignados):**
+   - En el esquema **estático**, sobreasignar empeora el rendimiento (de 0.026 s a 0.036 s en el cluster) porque todos los procesos compiten por CPU continua y el costo de cambio de contexto degrada la ejecución sin aportar beneficio.
+   - En el esquema **dinámico**, sobreasignar hasta el doble de procesos asignados (192 procesos sobre 96 núcleos en el cluster, o 20-24 procesos sobre 16 hilos en la máquina local) puede **mejorar** el tiempo respecto a configuraciones intermedias o incluso igualar/mejorar el límite nominal (0.026 s en 192 frente a 0.027 s en 96 y 0.034 s en el estático). Esto ocurre porque la sobreasignación permite **ocultar la latencia de comunicación**: mientras un proceso está bloqueado esperando que el maestro le asigne un bloque por MPI, otro proceso aprovecha ese núcleo para seguir calculando.
+5. El paralelismo estático es superior al dinámico en escenarios sin sobreasignación debido a la homogeneidad del problema y la ausencia total de comunicación intermedia. Sin embargo, el dinámico resulta más resiliente y eficiente cuando el entorno se sobreasigna fuertemente.
 6. En el dinámico, la eficiencia arranca baja (~50% con 2 procesos al haber un solo trabajador), pero crece con la cantidad de procesos a medida que el costo del maestro se diluye entre más trabajadores.
 7. El tamaño de bloque en el dinámico presenta un compromiso claro: bloques muy chicos saturan al maestro de mensajes y bloques muy grandes desbalancean la carga al final.
 

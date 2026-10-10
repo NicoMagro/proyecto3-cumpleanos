@@ -8,7 +8,7 @@ GRUPOS=${2:-2000000}
 REPETICIONES=${3:-10}
 
 # Configuracion de la prueba
-PROCESOS="2 4 6 8"
+PROCESOS="2 4 6 7 8 9 10 11 12 14 16 20 24"
 BLOQUES="1 4 42 425 4255 42553 200000 1000000"
 SALIDA=resultados/speedup.csv
 

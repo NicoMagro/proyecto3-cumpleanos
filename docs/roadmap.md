@@ -32,3 +32,5 @@ Conviene que los tres sepamos contestar estas:
 7. ¿Por que el paralelo estatico es superior al dinamico en este problema?
 8. ¿Por que el dinamico rinde tan poco (~50%) con 2 procesos y por que mejora con mas procesos?
 9. ¿Como influye el tamanio de bloque en el dinamico y por que no afecta a la precision?
+10. ¿Que impacto tiene activar SMT/Hyper-Threading y por que mejora el tiempo?
+11. ¿Por que en el paralelo dinamico sobreasignar procesos (ej. 192 en 96 nucleos) puede rendir mejor que en 96 o que en el estatico?

@@ -1,0 +1,7 @@
+Desktop de Sergio X3D desactivado
+
+AMD Ryzen 7 9800X3D 8-Core Processor @ 4.7GHz
+Nucleos fisicos: 8
+Nucleos logicos: 16
+Sistema: Ubuntu 26.04.1 LTS
+mpirun (Open MPI) 5.0.10
