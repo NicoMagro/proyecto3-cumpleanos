@@ -6,16 +6,16 @@
 - [x] Version paralela estatica con MPI (`src/paralelo-estatico.c`)
 - [x] Version paralela dinamica con maestro-trabajadores (`src/paralelo-dinamico.c`)
 - [x] Tests
-- [x] Script de mediciones automaticas (`speedup.sh`)
+- [x] Script de mediciones automaticas (`speedup.sh`, `precision.sh` y `curva_pk.sh`)
 - [x] Mediciones de speedup en notebook de Nicolas, desktop de Sergio y cluster
-- [x] Generacion de graficos (`src/graficos.py`)
+- [x] Generacion de graficos (`src/graficos.py`, `src/graficos_precision.py` y `src/graficos_pk.py`)
+- [x] Experimento 1: convergencia y precisión (ver `docs/como-correr.md`)
+- [x] Experimento 2: curva P(K) (ver `docs/como-correr.md`)
 
 ## Falta
 
 - [ ] Repartir quien hace que
 - [ ] Buscar bibliografia y escribir la seccion 8 del informe
-- [ ] Experimento 1: convergencia (ver docs/como-correr.md)
-- [ ] Experimento 2: curva P(K)
 - [ ] Escribir el informe final
 - [ ] Preparar la defensa oral
 

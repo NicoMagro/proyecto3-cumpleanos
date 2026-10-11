@@ -13,6 +13,11 @@ BLOQUES="1 4 42 425 4255 42553 200000 1000000"
 SALIDA=resultados/speedup.csv
 
 mkdir -p resultados
+
+mpicc src/cumpleanos.c src/serial.c -o serial || exit 1
+mpicc src/cumpleanos.c src/paralelo-estatico.c -o paralelo-estatico || exit 1
+mpicc src/cumpleanos.c src/paralelo-dinamico.c -o paralelo-dinamico || exit 1
+
 echo "tipo,k,grupos,procesos,bloque,p_simulada,p_teorica,tiempo" > $SALIDA
 
 for repeticion in $(seq 1 $REPETICIONES)
@@ -36,3 +41,5 @@ do
 done
 
 echo "Listo: $SALIDA"
+echo "Generando graficos..."
+python3 src/graficos.py

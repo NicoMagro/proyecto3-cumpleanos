@@ -35,27 +35,31 @@ cc src/cumpleanos.c tests/test_cumpleanos.c -o test -lm
 ./tests/test_paralelo.sh
 ```
 
-## Experimento 1: convergencia
+## Experimento 1: convergencia y precisión (automatizado con `precision.sh`)
 
-Cuantos mas grupos simulamos, mas se acerca el resultado a la teoria.
+Cuantos más grupos simulamos, más se acerca el resultado al valor teórico (convergencia $\mathcal{O}(1/\sqrt{N})$ de Monte Carlo).
 
-```bash
-for t in 1000 10000 100000 1000000 10000000
-do
-    mpirun --oversubscribe -n 4 ./paralelo-estatico 23 $t | grep "^csv"
-done
-```
-
-## Experimento 2: curva P(K)
-
-La probabilidad para distintos tamanios de grupo.
+Para correr automáticamente el barrido denso de grupos y registrar la evolución de la precisión:
 
 ```bash
-for k in 5 10 15 20 23 25 30 40 50 60 70
-do
-    mpirun --oversubscribe -n 4 ./paralelo-estatico $k 1000000 | grep "^csv"
-done
+./precision.sh [k] [procesos]
+# Por defecto corre con K=23 y 8 procesos:
+./precision.sh 23 8
 ```
+
+Al terminar las mediciones, el script ejecuta automáticamente `python3 src/graficos_precision.py` para generar los gráficos `resultados/precision/evolucion_probabilidad.png` y `resultados/precision/evolucion_error.png`.
+
+## Experimento 2: curva P(K) (automatizado con `curva_pk.sh`)
+
+Evalúa la probabilidad de coincidencia para distintos tamaños de grupo $K$ (desde 2 hasta 80 personas) y la compara contra el valor teórico.
+
+```bash
+./curva_pk.sh [grupos] [procesos]
+# Por defecto corre con 1.000.000 de grupos y 8 procesos:
+./curva_pk.sh 1000000 8
+```
+
+Al terminar las mediciones, el script ejecuta automáticamente `python3 src/graficos_pk.py` y genera `resultados/curva_pk/curva_pk.png`.
 
 ## Experimento 3: speedup (automatizado con `speedup.sh`)
 
@@ -73,7 +77,8 @@ variables al inicio del script:
 - `PROCESOS`: lista de procesos a probar (ej. `"2 4 6 8"` en laptop o `"2 4 6 8 12 16 24 32 48 64 96"` en cluster).
 - `BLOQUES`: tamaños de bloque a evaluar en el dinámico.
 
-Despues, para generar los graficos:
+Al terminar las mediciones, el script ejecuta automáticamente `python3 src/graficos.py`.
+Si hace falta regenerar los gráficos a mano:
 
 ```bash
 python3 src/graficos.py

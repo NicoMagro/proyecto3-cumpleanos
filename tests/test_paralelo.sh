@@ -8,7 +8,8 @@ cd "$(dirname "$0")/.."
 
 echo "Compilando..."
 mpicc src/cumpleanos.c src/serial.c -o serial || exit 1
-mpicc src/cumpleanos.c src/paralelo.c -o paralelo || exit 1
+mpicc src/cumpleanos.c src/paralelo-estatico.c -o paralelo-estatico || exit 1
+mpicc src/cumpleanos.c src/paralelo-dinamico.c -o paralelo-dinamico || exit 1
 
 echo ""
 echo "Serial:"
@@ -17,8 +18,15 @@ echo "Serial:"
 for p in 1 2 4
 do
     echo ""
-    echo "Paralelo con $p procesos:"
-    mpirun --oversubscribe -n $p ./paralelo 23 500000 | grep "Probabilidad simulada"
+    echo "Paralelo estatico con $p procesos:"
+    mpirun --oversubscribe -n $p ./paralelo-estatico 23 500000 | grep "Probabilidad simulada"
+done
+
+for p in 2 4
+do
+    echo ""
+    echo "Paralelo dinamico con $p procesos:"
+    mpirun --oversubscribe -n $p ./paralelo-dinamico 23 500000 5000 | grep "Probabilidad simulada"
 done
 
 echo ""
