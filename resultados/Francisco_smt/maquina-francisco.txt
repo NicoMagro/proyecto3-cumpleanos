@@ -1,0 +1,7 @@
+Notebook de Francisco
+
+ASUS TUF Gaming F15 FX506LH_FX506LH
+Nucleos fisicos: 4
+Nucleos logicos: 8
+Sistema: Ubuntu 26.04.1 LTS
+mpirun (Open MPI) 5.0.10
