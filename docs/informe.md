@@ -7,22 +7,14 @@ Integrantes: Ángel Nicolás Magro, Fran Leccese, Sergio Zair Lobo
 
 ---
 
+## 0. Enunciado de la paradoja
+La paradoja del cumpleaños establece que si hay 23 personas reunidas hay una probablidad del 50,7% de que al menos dos personas de ellas cumplan años el mismo día. Para 60 o más personas la probabilidad es mayor del 99%. Obviamente es casi del 100% para 366 personas (teniendo en cuenta los años bisiestos).
+
 ## 1. El problema
 
-La paradoja del cumpleaños plantea la siguiente pregunta: en un grupo de K
-personas elegidas al azar, ¿qué probabilidad hay de que al menos dos de ellas
-cumplan años el mismo día?
+En terminos rigurosos, esto no es una paradoja ya que no existe una contradicción lógica, es una paradoja en el sentido que es una verdad matemática contraria con el sentido comun y la intuicion.
+Cuando se propone este problema por primera vez y se pide una estimación sobre el tamaño mínimo que debería tener un grupo para que la probabilidad de encontrar 2 personas que comparten fecha de cumpleaños sea del 50%, la mayoría de las personas se equivoca por completo. Por ejemplo La respuesta intuitiva que se da a menudo es 183, es decir 365 dividido entre dos lo cual esta muy alejado de la respuesta correcta de K=23. Este error de razonamiento se debe a que uno tiende a pensar en cuántas personas comparten cumpleaños _con uno mismo_, que son 22 comparaciones; Pero la pregunta es si existe alguna coincidencia entre _cualquier_ par del grupo, y en un grupo de 23 personas hay 23 × 22 / 2 = 253 pares posibles. Es esa cantidad de pares, y no la cantidad de personas, la que hace crecer la probabilidad tan rápido.
 
-Se la llama paradoja porque el resultado contradice la intuición. Frente a 365
-días posibles, uno esperaría necesitar un grupo muy numeroso para que aparezca
-una coincidencia. Sin embargo, con solo 23 personas la probabilidad ya supera
-el 50%, y con 57 personas pasa el 99%.
-
-La intuición falla porque uno tiende a pensar en cuántas personas comparten
-cumpleaños _con uno mismo_, que son 22 comparaciones. Pero la pregunta es si
-existe alguna coincidencia entre _cualquier_ par del grupo, y en un grupo de 23
-personas hay 23 × 22 / 2 = 253 pares posibles. Es esa cantidad de pares, y no
-la cantidad de personas, la que hace crecer la probabilidad tan rápido.
 
 ## 2. La solución analítica
 
@@ -384,5 +376,4 @@ Observaciones y análisis detallado:
 - **Separar las semillas de los procesos** (por ejemplo `12345 + rango * 7919`)
   y verificar la independencia de las secuencias comparando la estimación que
   produce cada semilla por separado.
-- **Balance de carga dinámico** para máquinas con núcleos de distinta
-  velocidad, en lugar del reparto estático actual.
+
