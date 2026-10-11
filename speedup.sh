@@ -13,7 +13,7 @@ BLOQUES="1 4 42 425 4255 42553 200000 1000000"
 SALIDA=resultados/speedup.csv
 
 mkdir -p resultados
-#echo "tipo,k,grupos,procesos,bloque,p_simulada,p_teorica,tiempo" > $SALIDA
+echo "tipo,k,grupos,procesos,bloque,p_simulada,p_teorica,tiempo" > $SALIDA
 
 for repeticion in $(seq 1 $REPETICIONES)
 do
