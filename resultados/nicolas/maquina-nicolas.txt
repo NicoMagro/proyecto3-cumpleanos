@@ -1,7 +1,12 @@
 Notebook de Nicolas
 
 Apple M2 Pro
-Nucleos fisicos: 10
+Nucleos fisicos: 10 (6 de rendimiento + 4 de eficiencia)
 Nucleos logicos: 10
+Memoria (GB): 16
 Sistema: Darwin 25.5.0 arm64
 mpirun (Open MPI) 5.0.8
+
+Mediciones: K=23, 2000000 grupos, 10 repeticiones
+ATENCION - Compilado CON optimizacion: mpicc -O2
+Los tiempos absolutos no son comparables con corridas sin -O2.
