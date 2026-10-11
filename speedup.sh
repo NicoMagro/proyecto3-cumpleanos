@@ -8,19 +8,19 @@ GRUPOS=${2:-2000000}
 REPETICIONES=${3:-10}
 
 # Configuracion de la prueba
-PROCESOS="2 4 6 7 8 9 10 11 12 14 16 20 24"
+PROCESOS="2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24"
 BLOQUES="1 4 42 425 4255 42553 200000 1000000"
 SALIDA=resultados/speedup.csv
 
 mkdir -p resultados
-echo "tipo,k,grupos,procesos,bloque,p_simulada,p_teorica,tiempo" > $SALIDA
+#echo "tipo,k,grupos,procesos,bloque,p_simulada,p_teorica,tiempo" > $SALIDA
 
 for repeticion in $(seq 1 $REPETICIONES)
 do
     echo "Repeticion $repeticion de $REPETICIONES"
 
     # Corrida del serial
-    ./serial $K $GRUPOS | grep "^csv" | sed 's/^csv/serial/' >> $SALIDA
+    mpirun -n 1 ./serial $K $GRUPOS | grep "^csv" | sed 's/^csv/serial/' >> $SALIDA
 
     for p in $PROCESOS
     do
