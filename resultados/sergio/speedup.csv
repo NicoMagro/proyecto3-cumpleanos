@@ -1,3 +1,4 @@
+tipo,k,grupos,procesos,bloque,p_simulada,p_teorica,tiempo
 serial,23,2000000,1,0,0.507150,0.507297,0.612
 estatico,23,2000000,2,0,0.507660,0.507297,0.286
 dinamico,23,2000000,2,1,0.507639,0.507297,1.472
