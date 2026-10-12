@@ -8,5 +8,5 @@ Sistema: Darwin 25.5.0 arm64
 mpirun (Open MPI) 5.0.8
 
 Mediciones: K=23, 2000000 grupos, 10 repeticiones
-ATENCION - Compilado CON optimizacion: mpicc -O2
-Los tiempos absolutos no son comparables con corridas sin -O2.
+Compilado sin optimizacion, igual que docs/como-correr.md:
+  mpicc src/cumpleanos.c src/serial.c -o serial
