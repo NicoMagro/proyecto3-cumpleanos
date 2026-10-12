@@ -1,12 +1,8 @@
-/*
-   Paradoja del cumpleanios - version PARALELA ESTATICA con MPI
-
-   Los grupos a simular se reparten de forma fija y equitativa entre los procesos.
-   Cada proceso cuenta sus coincidencias y al final se suman todas con MPI_Reduce.
-
-   Compilar:  mpicc src/cumpleanos.c src/paralelo-estatico.c -o paralelo-estatico
-   Ejecutar:  mpirun -n 4 ./paralelo-estatico 23 1000000
-*/
+// Paradoja del cumpleanios - version PARALELA ESTATICA con MPI.
+// Los grupos se reparten de forma fija y equitativa entre los procesos;
+// las coincidencias se suman al final con MPI_Reduce.
+// Compilar: mpicc src/cumpleanos.c src/paralelo-estatico.c -o paralelo-estatico
+// Ejecutar: mpirun -n 4 ./paralelo-estatico 23 1000000
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
@@ -35,22 +31,18 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    /* Repartimos los grupos entre los procesos */
+    // Repartimos los grupos entre los procesos
     mi_cantidad = cantidad / n_procesos;
 
-    
-    /* Si la division no es exacta, el proceso que tenga rango menor a la 
-       cantidad de grupos que sobran, aumenta su cantidad en 1*/
+    // Si la division no es exacta, los primeros procesos con resto suman 1
     if (rango < cantidad % n_procesos)
         mi_cantidad++;
 
-    /* Todos arrancan a medir al mismo tiempo */
+    // Todos arrancan a medir al mismo tiempo
     MPI_Barrier(MPI_COMM_WORLD);
     inicio = MPI_Wtime();
 
-    /* Cada proceso usa una semilla distinta. Si todos usaran la misma,
-       simularian exactamente los mismos grupos y el resultado seria
-       como haber hecho una sola parte repetida varias veces. */
+    // Cada proceso usa una semilla distinta; si no, simularian lo mismo.
     mis_coincidencias = simular_grupos(k, mi_cantidad, 12345 + rango);
 
     mi_tiempo = MPI_Wtime() - inicio;
@@ -58,12 +50,11 @@ int main(int argc, char **argv)
     printf("Proceso %d: simule %ld grupos y encontre %ld coincidencias\n",
            rango, mi_cantidad, mis_coincidencias);
 
-    /* Sumamos las coincidencias de todos los procesos en el proceso 0 */
+    // Sumamos las coincidencias de todos los procesos en el proceso 0
     MPI_Reduce(&mis_coincidencias, &total_coincidencias, 1, MPI_LONG,
                MPI_SUM, 0, MPI_COMM_WORLD);
 
-    /* El tiempo de la corrida es el del proceso que mas tardo, porque
-       el trabajo no termina hasta que termina el ultimo */
+    // El tiempo de la corrida es el del proceso que mas tardo
     MPI_Reduce(&mi_tiempo, &tiempo, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
     if (rango == 0)

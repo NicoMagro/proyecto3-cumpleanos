@@ -1,33 +1,23 @@
-/*
-   Paradoja del cumpleanios - version PARALELA DINAMICA con MPI (maestro-trabajadores)
-
-   El proceso 0 (maestro) no simula: solo reparte bloques de grupos a pedido.
-   Cada trabajador pide un bloque, lo simula y vuelve a pedir otro hasta que
-   el maestro le responde que ya no queda trabajo. Asi los procesos mas rapidos
-   hacen mas bloques y nadie queda esperando a los demas.
-
-   Cada trabajador acumula sus coincidencias localmente y las envia una sola
-   vez al final con MPI_Reduce, por lo que durante la ejecucion solo viajan
-   mensajes muy pequenios (pedido de trabajo y asignacion de bloque).
-
-   Compilar:  mpicc src/cumpleanos.c src/paralelo-dinamico.c -o paralelo-dinamico
-   Ejecutar:  mpirun -n 4 ./paralelo-dinamico 23 1000000 5000
-              (personas, grupos y tamanio de bloque; los tres son opcionales)
-*/
+// Paradoja del cumpleanios - version PARALELA DINAMICA con MPI (maestro-trabajadores).
+// El proceso 0 (maestro) reparte bloques a pedido; los mas rapidos hacen mas
+// bloques. Cada trabajador acumula sus coincidencias y las envia al final con
+// MPI_Reduce, asi que en la ejecucion solo viajan mensajes pequenios.
+// Compilar: mpicc src/cumpleanos.c src/paralelo-dinamico.c -o paralelo-dinamico
+// Ejecutar: mpirun -n 4 ./paralelo-dinamico 23 1000000 5000
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
 #include "cumpleanos.h"
 
-#define TAG_PEDIDO  1   /* trabajador -> maestro: "dame trabajo"        */
-#define TAG_TRABAJO 2   /* maestro -> trabajador: bloque a simular       */
+#define TAG_PEDIDO  1   // trabajador -> maestro: "dame trabajo"
+#define TAG_TRABAJO 2   // maestro -> trabajador: bloque a simular
 
 int main(int argc, char **argv)
 {
     int rango, n_procesos;
     int k = 23;
     long cantidad = 1000000;
-    long bloque = 0;                /* 0 = elegir automaticamente */
+    long bloque = 0;                // 0 = elegir automaticamente
     long mis_coincidencias = 0, total_coincidencias;
     long mis_grupos = 0, mis_bloques = 0;
     double inicio, mi_tiempo, tiempo, p_simulada, p_teorica;
@@ -50,8 +40,8 @@ int main(int argc, char **argv)
 
     int n_trabajadores = (n_procesos > 1) ? n_procesos - 1 : 1;
 
-    /* Tamanio de bloque automatico: unos 20 bloques por trabajador.
-       Pocos bloques desbalancean la carga; demasiados llenan la red de mensajes. */
+    // Tamanio de bloque automatico: ~20 bloques por trabajador.
+    // Pocos desbalancean la carga; demasiados llenan la red de mensajes.
     if (bloque == 0)
     {
         bloque = cantidad / ((long)n_trabajadores * 20);
@@ -59,30 +49,30 @@ int main(int argc, char **argv)
     }
     if (bloque > cantidad) bloque = cantidad;
 
-    /* Todos arrancan a medir al mismo tiempo */
+    // Todos arrancan a medir al mismo tiempo
     MPI_Barrier(MPI_COMM_WORLD);
     inicio = MPI_Wtime();
 
     if (n_procesos == 1)
     {
-        /* Sin trabajadores: el unico proceso hace todo en forma secuencial */
+        // Sin trabajadores: el unico proceso hace todo en forma secuencial
         mis_coincidencias = simular_grupos(k, cantidad, 12345);
         mis_grupos = cantidad;
         mis_bloques = 1;
     }
     else if (rango == 0)
     {
-        /* ---------------- MAESTRO ---------------- */
-        long siguiente = 0;          /* proximo grupo sin asignar */
-        long id_bloque = 0;          /* numero de bloque (sirve de semilla) */
-        int terminados = 0;          /* trabajadores que ya terminaron */
+        // ---------------- MAESTRO ----------------
+        long siguiente = 0;   // proximo grupo sin asignar
+        long id_bloque = 0;   // numero de bloque (sirve de semilla)
+        int terminados = 0;   // trabajadores que ya terminaron
         int pedido;
-        long mensaje[2];             /* {id del bloque, cantidad de grupos} */
+        long mensaje[2];      // {id del bloque, cantidad de grupos}
         MPI_Status estado;
 
         while (terminados < n_trabajadores)
         {
-            /* Espera el pedido de cualquier trabajador */
+            // Espera el pedido de cualquier trabajador
             MPI_Recv(&pedido, 1, MPI_INT, MPI_ANY_SOURCE, TAG_PEDIDO,
                      MPI_COMM_WORLD, &estado);
 
@@ -90,13 +80,13 @@ int main(int argc, char **argv)
             {
                 long resto = cantidad - siguiente;
                 mensaje[0] = id_bloque++;
-                mensaje[1] = (resto < bloque) ? resto : bloque; /* ultimo bloque puede ser menor */
+                mensaje[1] = (resto < bloque) ? resto : bloque; // ultimo bloque puede ser menor
                 siguiente += mensaje[1];
             }
             else
             {
                 mensaje[0] = -1;
-                mensaje[1] = 0;      /* 0 grupos = no hay mas trabajo */
+                mensaje[1] = 0; // 0 grupos = no hay mas trabajo
                 terminados++;
             }
 
@@ -106,7 +96,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        /* ---------------- TRABAJADORES ---------------- */
+        // ---------------- TRABAJADORES ----------------
         int pedido = 0;
         long mensaje[2];
 
@@ -119,9 +109,8 @@ int main(int argc, char **argv)
             if (mensaje[1] == 0)
                 break;
 
-            /* La semilla depende del numero de bloque, no del proceso:
-               cada bloque es distinto y el resultado total no cambia
-               aunque los bloques se repartan de otra manera. */
+            // La semilla depende del numero de bloque, no del proceso:
+            // el total no cambia aunque los bloques se repartan distinto.
             mis_coincidencias += simular_grupos(k, mensaje[1], 12345 + mensaje[0]);
             mis_grupos += mensaje[1];
             mis_bloques++;
@@ -134,12 +123,11 @@ int main(int argc, char **argv)
         printf("Proceso %d: simule %ld grupos en %ld bloques y encontre %ld coincidencias\n",
                rango, mis_grupos, mis_bloques, mis_coincidencias);
 
-    /* Sumamos las coincidencias de todos los procesos en el proceso 0
-       (el maestro aporta 0) */
+    // Sumamos las coincidencias de todos los procesos en el 0 (maestro aporta 0)
     MPI_Reduce(&mis_coincidencias, &total_coincidencias, 1, MPI_LONG,
                MPI_SUM, 0, MPI_COMM_WORLD);
 
-    /* El tiempo de la corrida es el del proceso que mas tardo */
+    // El tiempo de la corrida es el del proceso que mas tardo
     MPI_Reduce(&mi_tiempo, &tiempo, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
     if (rango == 0)

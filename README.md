@@ -28,10 +28,12 @@ entre varios procesos con MPI.
 
 ```bash
 mpicc src/cumpleanos.c src/serial.c -o serial
-mpicc src/cumpleanos.c src/paralelo.c -o paralelo
+mpicc src/cumpleanos.c src/paralelo-estatico.c -o paralelo-estatico
+mpicc src/cumpleanos.c src/paralelo-dinamico.c -o paralelo-dinamico
 
 ./serial 23 1000000
-mpirun -n 4 ./paralelo 23 1000000
+mpirun -n 4 ./paralelo-estatico 23 1000000
+mpirun -n 4 ./paralelo-dinamico 23 1000000 5000
 ```
 
 Mas detalles y los comandos de los experimentos en [docs/como-correr.md](docs/como-correr.md).
@@ -40,36 +42,36 @@ Mas detalles y los comandos de los experimentos en [docs/como-correr.md](docs/co
 
 | Carpeta | Que hay adentro |
 |---|---|
-| `src/cumpleanos.c` | La simulacion y la formula teorica |
-| `src/serial.c` | Programa serial, sirve de referencia para el speedup |
-| `src/paralelo.c` | Programa con MPI |
-| `src/graficos.py` | Genera los graficos a partir de los resultados |
+| `src/cumpleanos.c` / `.h` | La simulacion y la formula teorica |
+| `src/serial.c` | Programa serial, sirve de referencia (T1) para el speedup |
+| `src/paralelo-estatico.c` | Programa MPI con reparto fijo de grupos |
+| `src/paralelo-dinamico.c` | Programa MPI maestro-trabajadores con bloques |
+| `src/graficos.py` y `graficos_*.py` | Generan los graficos a partir de los resultados |
 | `tests/` | Tests de las funciones y de la version paralela |
 | `docs/` | Informe, roadmap y como correr todo |
 | `resultados/` | Los CSV y los graficos de cada maquina |
 
-## Resultados que ya tenemos
+## Resultados
 
-Speedup medido en la notebook de Nicolas (2 millones de grupos, K=23,
-mediana de 10 corridas):
+Todas las mediciones usan 2.000.000 de grupos y K=23. Se comparan dos
+esquemas: **estatico** (reparto fijo) y **dinamico** (maestro-trabajadores).
+Entre parentesis, la cantidad de procesos donde se dio el mejor speedup.
 
-| Procesos | Mediana | Speedup | Eficiencia |
-|---|---|---|---|
-| 1 | 1.325 s | 1.00 | 1.00 |
-| 2 | 0.661 s | 2.00 | 1.00 |
-| 4 | 0.328 s | 4.05 | 1.01 |
-| 6 | 0.233 s | 5.68 | 0.95 |
-| 8 | 0.205 s | 6.47 | 0.81 |
+| Maquina | Nucleos / Hilos | T. serial (s) | Sp. Estatico (max) | Sp. Dinamico (max) |
+|---|---|---|---|---|
+| Notebook Nicolas (Apple M2 Pro) | 10 nucleos | 0.419 | 9.12 (16) | 8.93 (11) |
+| Sergio (SMT desactivado) | 8 nucleos / 8 hilos | 0.591 | 8.20 (8) | 7.34 (21) |
+| Sergio (SMT activado) | 8 nucleos / 16 hilos | 0.592 | 11.61 (16) | 11.17 (24) |
+| Cluster CCAD UNC | 128 CPU (cuota 96) | 2.319 | 89.21 (96) | 92.78 (192) |
+| Notebook Francisco (ASUS TUF) | 4 nucleos / 8 hilos | 1.812 | 6.07 (8) | 6.03 (17) |
 
-Speedup medido en la desktop de Sergio (2 millones de grupos, K=23,
-mediana de 10 corridas):
+Conclusiones principales:
 
-| Procesos | Mediana | Speedup | Eficiencia |
-|---|---|---|---|
-| 1 | 0.593 s | 1.00 | 1.00 |
-| 2 | 0.286 s | 2.08 | 1.04 |
-| 4 | 0.145 s | 4.08 | 1.02 |
-| 6 | 0.098 s | 6.06 | 1.01 |
-| 8 | 0.080 s | 7.47 | 0.93 |
+- El esquema **estatico** escala casi de forma lineal mientras haya nucleos
+  reales (eficiencia cercana al 100% hasta saturar).
+- Con SMT y sobreasignacion el **dinamico** termina ganando porque oculta la
+  latencia de comunicacion (p. ej. 192 procesos en el cluster: 0.025 s vs
+  0.036 s del estatico).
+- El tamanio de bloque optimo del dinamico ronda los 425-4.255 grupos.
 
-Falta correr lo mismo en la notebook restante y en el servidor.
+Detalle completo, graficos y mapas de calor en [docs/informe.md](docs/informe.md).
