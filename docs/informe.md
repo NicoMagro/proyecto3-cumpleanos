@@ -219,14 +219,64 @@ comparables entre sí.
 
 ### 5.1 Convergencia
 
-_(Pendiente: correr el experimento 1 de docs/como-correr.md)_
+Para estudiar cómo mejora la estimación al aumentar la cantidad de simulaciones
+se fijó K=23 y se varió T entre mil y diez millones de grupos. Cada valor de T
+se repitió con **diez semillas distintas**, de modo que cada repetición es una
+muestra independiente; se reporta la mediana de los diez errores.
 
-Se espera que el error disminuya proporcionalmente a 1/√T, que es la velocidad
-de convergencia característica del método de Monte Carlo.
+| Grupos simulados (T) | Error absoluto (mediana) | Error × √T | Error relativo |
+| -------------------- | ------------------------ | ---------- | -------------- |
+| 1.000 | 0.007000 | 0.221 | 1.38 % |
+| 10.000 | 0.002453 | 0.245 | 0.48 % |
+| 100.000 | 0.000902 | 0.285 | 0.18 % |
+| 1.000.000 | 0.000311 | 0.311 | 0.06 % |
+| 10.000.000 | 0.000087 | 0.277 | 0.02 % |
+
+![Convergencia del error](../resultados/probabilidad/convergencia.png)
+
+La tercera columna es la verificación de la ley de convergencia. Si el error
+decae como 1/√T, el producto error × √T debe mantenerse aproximadamente
+constante, y efectivamente se mantiene entre 0.22 y 0.31 **a lo largo de cuatro
+órdenes de magnitud**. En el gráfico, en escala logarítmica en ambos ejes, los
+puntos siguen una recta paralela a la referencia 1/√T.
+
+La consecuencia práctica es importante y constituye la limitación de fondo del
+método de Monte Carlo: **para reducir el error a la décima parte hay que
+simular cien veces más grupos**. Pasar de mil a diez millones de simulaciones
+(diez mil veces más trabajo) mejoró la precisión apenas unas ochenta veces. Por
+eso el método resulta conveniente cuando basta con una precisión moderada, y
+deja de serlo cuando se exigen muchas cifras significativas.
+
+La nube de puntos del gráfico muestra además la dispersión entre semillas: con
+T pequeño los resultados varían mucho de una corrida a otra, mientras que con T
+grande todas las semillas se agrupan en un rango estrecho.
 
 ### 5.2 Curva P(K)
 
-_(Pendiente: correr el experimento 2 de docs/como-correr.md)_
+Se simularon grupos de 2 a 100 personas, con un millón de grupos para cada
+tamaño, y se comparó la frecuencia observada contra la fórmula analítica.
+
+![Curva P(K) simulada contra teórica](../resultados/probabilidad/curva_pk.png)
+
+Las dos curvas se superponen en toda su extensión. La mayor discrepancia en los
+99 valores de K es de **0.00136** (en K=20), del orden del error
+estadístico esperable para un millón de muestras.
+
+| K | P simulada | P teórica | Diferencia |
+| - | ---------- | --------- | ---------- |
+| 10 | 0.1169 | 0.1169 | 0.0001 |
+| 23 | 0.5064 | 0.5073 | 0.0009 |
+| 30 | 0.7056 | 0.7063 | 0.0007 |
+| 41 | 0.9030 | 0.9032 | 0.0002 |
+| 57 | 0.9903 | 0.9901 | 0.0001 |
+| 70 | 0.9992 | 0.9992 | 0.0001 |
+
+El gráfico muestra con claridad por qué el resultado se considera
+contraintuitivo: la curva **no crece de manera lineal**. Arranca muy lenta
+(con 10 personas la probabilidad es de apenas 12%), se dispara en la zona
+central cruzando el 50% en K=23, y luego se aplana acercándose asintóticamente
+a 1 sin alcanzarlo nunca hasta K=366. La intuición suele suponer un crecimiento
+proporcional, y de ahí la respuesta habitual de 183 personas.
 
 ### 5.3 Speedup y eficiencia
 
@@ -246,7 +296,9 @@ valor mínimo y el máximo) como verificación independiente.
 
 Fórmulas utilizadas: **Sp = T1 / Tp** y **Ep = Sp / p**.
 
-Gráficos: `resultados/speedup.png` y `resultados/eficiencia.png`.
+![Speedup - notebook de Nicolás](../resultados/nicolas/speedup.png)
+
+![Eficiencia paralela - notebook de Nicolás](../resultados/nicolas/eficiencia.png)
 
 Observaciones:
 
@@ -266,11 +318,12 @@ Observaciones:
 
 ### 5.4 Comparación: Estático vs Dinámico
 
-Para comparar ambas estrategias se midieron en cuatro escenarios:
+Para comparar ambas estrategias se midieron en cinco escenarios:
 1. **Desktop de Sergio (SMT desactivado / 8 núcleos físicos, 8 hilos):** AMD Ryzen 7 9800X3D.
 2. **Desktop de Sergio (SMT activado / 8 núcleos físicos, 16 hilos):** AMD Ryzen 7 9800X3D.
 3. **Cluster CCAD UNC (2 sockets AMD EPYC 7B12 de 64 núcleos c/u = 128 núcleos totales, entorno JupyterLab limitado a 96 núcleos):** hasta 192 procesos.
 4. **Notebook de Nicolás (Apple M2 Pro, 10 núcleos heterogéneos: 6 de rendimiento + 4 de eficiencia):** hasta 24 procesos.
+5. **Equipo de Francisco:** hasta 24 procesos.
 
 Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada cantidad de procesos.
 
@@ -291,6 +344,14 @@ Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada can
 | 20       | 0.096           | 6.26         | 0.31       | 0.083           | 7.24         | 0.36       | 4.255        |
 | 24       | 0.099           | 6.07         | 0.25       | 0.087           | 6.91         | 0.29       | 425          |
 
+![Speedup - desktop de Sergio sin SMT](../resultados/sergio/speedup.png)
+
+![Eficiencia - desktop de Sergio sin SMT](../resultados/sergio/eficiencia.png)
+
+![Tamaño de bloque - desktop de Sergio sin SMT](../resultados/sergio/bloques.png)
+
+![Dispersión de los tiempos - desktop de Sergio sin SMT](../resultados/sergio/dispersion.png)
+
 #### Caso 2: Desktop de Sergio con SMT activado (8 núcleos físicos / 16 hilos lógicos, T_serial = 0.601 s)
 
 | Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
@@ -308,6 +369,10 @@ Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada can
 | 17       | 0.064           | 9.39         | 0.55       | 0.055           | 10.93        | 0.64       | 4.255        |
 | 20       | 0.062           | 9.69         | 0.48       | 0.054           | 11.13        | 0.56       | 425          |
 | 24       | 0.063           | 9.54         | 0.40       | 0.054           | 11.13        | 0.46       | 425          |
+
+![Speedup - desktop de Sergio con SMT](<../resultados/sergio smt/speedup.png>)
+
+![Dispersión de los tiempos - desktop de Sergio con SMT](<../resultados/sergio smt/dispersion.png>)
 
 #### Caso 3: Cluster CCAD UNC (Dual AMD EPYC 7B12, límite 96 núcleos asignados, T_serial = 2.319 s)
 
@@ -328,6 +393,14 @@ Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada can
 | 128      | 0.034           | 68.21        | 0.53       | 0.031           | 74.81        | 0.58       | 425          |
 | 160      | 0.031           | 74.81        | 0.47       | 0.029           | 79.97        | 0.50       | 425          |
 | 192      | 0.036           | 64.42        | 0.34       | 0.026           | 89.19        | 0.46       | 425          |
+
+![Speedup - cluster CCAD](../resultados/cluster/speedup.png)
+
+![Eficiencia - cluster CCAD](../resultados/cluster/eficiencia.png)
+
+![Tamaño de bloque - cluster CCAD](../resultados/cluster/bloques.png)
+
+![Dispersión de los tiempos - cluster CCAD](../resultados/cluster/dispersion.png)
 
 #### Caso 4: Notebook de Nicolás (Apple M2 Pro, 6 núcleos de rendimiento + 4 de eficiencia, T_serial = 1.312 s)
 
@@ -378,6 +451,38 @@ estático (eficiencia ≈ 1.00 en ambos). El esquema dinámico no es intrínseca
 menos eficiente: su costo es exactamente un proceso de coordinación, que pesa
 mucho con pocos procesos (con 2 procesos se pierde la mitad del poder de
 cómputo) y se diluye a medida que aumenta la cantidad de trabajadores.
+
+![Speedup - notebook de Nicolás](../resultados/nicolas/speedup.png)
+
+![Tamaño de bloque - notebook de Nicolás](../resultados/nicolas/bloques.png)
+
+![Dispersión de los tiempos - notebook de Nicolás](../resultados/nicolas/dispersion.png)
+
+#### Caso 5: Equipo de Francisco (T_serial = 1.812 s)
+
+| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
+| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
+| 2 | 0.927 | 1.96 | 0.98 | 1.843 | 0.98 | 0.49 | 42.553 |
+| 4 | 0.477 | 3.80 | 0.95 | 0.635 | 2.86 | 0.71 | 425 |
+| 6 | 0.369 | 4.91 | 0.82 | 0.415 | 4.36 | 0.73 | 425 |
+| 8 | 0.298 | 6.07 | 0.76 | 0.328 | 5.53 | 0.69 | 4.255 |
+| 9 | 0.360 | 5.03 | 0.56 | 0.326 | 5.56 | 0.62 | 4.255 |
+| 10 | 0.344 | 5.27 | 0.53 | 0.319 | 5.68 | 0.57 | 425 |
+| 12 | 0.345 | 5.25 | 0.44 | 0.317 | 5.72 | 0.48 | 42.553 |
+| 14 | 0.331 | 5.48 | 0.39 | 0.315 | 5.75 | 0.41 | 4.255 |
+| 16 | 0.343 | 5.29 | 0.33 | 0.307 | 5.90 | 0.37 | 4.255 |
+| 20 | 0.366 | 4.95 | 0.25 | 0.314 | 5.78 | 0.29 | 42.553 |
+| 24 | 0.350 | 5.17 | 0.22 | 0.310 | 5.85 | 0.24 | 4.255 |
+
+![Speedup - equipo de Francisco](../resultados/Francisco_smt/speedup.png)
+
+![Dispersión de los tiempos - equipo de Francisco](../resultados/Francisco_smt/dispersion.png)
+
+> **Falta completar:** la carpeta `resultados/Francisco_smt/` no incluye el
+> archivo con la descripción del hardware, por lo que no es posible interpretar
+> en qué punto esta máquina agota sus núcleos físicos ni compararla con las
+> demás. Hay que agregar un `maquina.txt` con la salida de `lscpu` o
+> `sysctl -n machdep.cpu.brand_string`.
 
 Observaciones y análisis detallado:
 

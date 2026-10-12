@@ -90,3 +90,38 @@ sysctl -n machdep.cpu.brand_string; sysctl -n hw.physicalcpu
 # En Linux
 lscpu | grep "Model name"; nproc
 ```
+
+## Experimentos de probabilidad
+
+Estos no miden rendimiento sino la parte matematica del trabajo: que la
+simulacion coincida con la teoria. No dependen de la maquina, asi que alcanza
+con correrlos una vez.
+
+```bash
+./probabilidad.sh
+python3 src/graficos-probabilidad.py
+```
+
+Genera en `resultados/probabilidad/`:
+
+- `convergencia.csv` y `convergencia.png`: el error con 1.000, 10.000, 100.000,
+  un millon y diez millones de grupos, repitiendo cada caso con 10 semillas
+  distintas.
+- `curva_pk.csv` y `curva_pk.png`: la probabilidad para K de 2 a 100.
+
+El serial acepta un tercer parametro opcional con la semilla, que es lo que
+permite repetir el mismo experimento con muestras distintas:
+
+```bash
+./serial 23 1000000 777
+```
+
+## Diagramas de caja
+
+Muestran la dispersion de las 10 repeticiones de cada configuracion, que la
+tabla de medianas no deja ver. Genera un `dispersion.png` en la carpeta de
+cada maquina que tenga su `speedup.csv`.
+
+```bash
+python3 src/graficos-dispersion.py
+```

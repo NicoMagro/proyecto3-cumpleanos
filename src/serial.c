@@ -19,6 +19,8 @@ int main(int argc, char **argv)
 {
     int k = 23;                  /* personas por grupo */
     long cantidad = 1000000;     /* cantidad de grupos a simular */
+    unsigned int semilla = 12345;/* semilla; cambiarla permite repetir el
+                                    experimento con otra muestra al azar */
     long coincidencias;
     double p_simulada, p_teorica;
     double t_inicio, t_fin, tiempo;
@@ -28,17 +30,18 @@ int main(int argc, char **argv)
     /* Los argumentos llegan como texto: atoi y atol los pasan a numero */
     if (argc > 1) k = atoi(argv[1]);
     if (argc > 2) cantidad = atol(argv[2]);
+    if (argc > 3) semilla = (unsigned int)atol(argv[3]);
 
     if (k < 1 || cantidad < 1)
     {
-        printf("Uso: %s [personas] [grupos]\n", argv[0]);
+        printf("Uso: %s [personas] [grupos] [semilla]\n", argv[0]);
         MPI_Finalize();
         return 1;
     }
 
     /* Medimos solo la simulacion, que es la parte pesada */
     t_inicio = MPI_Wtime();
-    coincidencias = simular_grupos(k, cantidad, 12345);
+    coincidencias = simular_grupos(k, cantidad, semilla);
     t_fin = MPI_Wtime();
 
     tiempo = t_fin - t_inicio;
