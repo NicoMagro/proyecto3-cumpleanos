@@ -231,7 +231,7 @@ _(Pendiente: correr el experimento 2 de docs/como-correr.md)_
 ### 5.3 Speedup y eficiencia
 
 Mediciones realizadas en la notebook de Nicolás (ver
-`resultados/maquina-nicolas.txt`), simulando 2.000.000 de grupos con K=23.
+`resultados/nicolas/maquina-nicolas.txt`), simulando 2.000.000 de grupos con K=23.
 Cada configuración se ejecutó **10 veces** y se reporta la **mediana**, tal
 como pide la consigna. Se incluye además el promedio recortado (descartando el
 valor mínimo y el máximo) como verificación independiente.
@@ -266,10 +266,11 @@ Observaciones:
 
 ### 5.4 Comparación: Estático vs Dinámico
 
-Para comparar ambas estrategias se midieron en tres escenarios:
+Para comparar ambas estrategias se midieron en cuatro escenarios:
 1. **Desktop de Sergio (SMT desactivado / 8 núcleos físicos, 8 hilos):** AMD Ryzen 7 9800X3D.
 2. **Desktop de Sergio (SMT activado / 8 núcleos físicos, 16 hilos):** AMD Ryzen 7 9800X3D.
 3. **Cluster CCAD UNC (2 sockets AMD EPYC 7B12 de 64 núcleos c/u = 128 núcleos totales, entorno JupyterLab limitado a 96 núcleos):** hasta 192 procesos.
+4. **Notebook de Nicolás (Apple M2 Pro, 10 núcleos heterogéneos: 6 de rendimiento + 4 de eficiencia):** hasta 24 procesos.
 
 Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada cantidad de procesos.
 
@@ -327,6 +328,56 @@ Para el dinámico se reporta el mejor tamaño de bloque encontrado para cada can
 | 128      | 0.034           | 68.21        | 0.53       | 0.031           | 74.81        | 0.58       | 425          |
 | 160      | 0.031           | 74.81        | 0.47       | 0.029           | 79.97        | 0.50       | 425          |
 | 192      | 0.036           | 64.42        | 0.34       | 0.026           | 89.19        | 0.46       | 425          |
+
+#### Caso 4: Notebook de Nicolás (Apple M2 Pro, 6 núcleos de rendimiento + 4 de eficiencia, T_serial = 1.312 s)
+
+| Procesos | T. Estático (s) | Speedup Est. | Efic. Est. | T. Dinámico (s) | Speedup Din. | Efic. Din. | Mejor Bloque |
+| -------- | --------------- | ------------ | ---------- | --------------- | ------------ | ---------- | ------------ |
+| 2        | 0.653           | 2.01         | 1.00       | 1.305           | 1.01         | 0.50       | 4.255        |
+| 4        | 0.328           | 4.01         | 1.00       | 0.436           | 3.01         | 0.75       | 4.255        |
+| 6        | 0.221           | 5.95         | 0.99       | 0.262           | 5.01         | 0.83       | 200.000      |
+| 7        | 0.206           | 6.35         | 0.91       | 0.236           | 5.55         | 0.79       | 4.255        |
+| 8        | 0.192           | 6.83         | 0.85       | 0.215           | 6.10         | 0.76       | 4.255        |
+| 9        | 0.179           | 7.31         | 0.81       | 0.199           | 6.61         | 0.73       | 425          |
+| 10       | 0.171           | 7.65         | 0.77       | 0.185           | 7.09         | 0.71       | 4.255        |
+| 12       | 0.172           | 7.63         | 0.64       | 0.175           | 7.48         | 0.62       | 200.000      |
+| 14       | 0.170           | 7.72         | 0.55       | 0.174           | 7.52         | 0.54       | 42.553       |
+| 16       | 0.170           | 7.72         | 0.48       | 0.176           | 7.45         | 0.47       | 200.000      |
+| 20       | 0.168           | 7.81         | 0.39       | 0.177           | 7.41         | 0.37       | 42.553       |
+| 24       | 0.167           | 7.88         | 0.33       | 0.180           | 7.27         | 0.30       | 42.553       |
+
+A diferencia de los otros escenarios, este procesador es **heterogéneo**: sus
+diez núcleos no son equivalentes, ya que seis están orientados a rendimiento y
+cuatro a eficiencia energética. Esto se refleja en la curva del estático, que
+mantiene eficiencia cercana a 1.00 hasta 6 procesos (la cantidad de núcleos
+rápidos) y luego se degrada progresivamente en lugar de hacerlo de golpe como
+en las máquinas homogéneas: al incorporar núcleos lentos el tiempo total pasa a
+estar determinado por ellos, ya que la corrida termina cuando termina el
+proceso más demorado. El speedup se estanca en torno a 7.9 a partir de los 10
+procesos.
+
+#### Eficiencia por trabajador: una comparación más justa
+
+Las tablas anteriores comparan ambos esquemas a igual cantidad de **procesos**,
+pero en el dinámico el proceso 0 no simula: con P procesos hay solo P−1
+trabajadores. Al normalizar la eficiencia del dinámico por la cantidad de
+trabajadores reales se observa que la penalización no proviene del esquema en
+sí, sino del proceso dedicado a coordinar:
+
+| Procesos | Efic. estático | Efic. dinámico (sobre P) | Efic. dinámico (sobre P−1 trabajadores) |
+| -------- | -------------- | ------------------------ | --------------------------------------- |
+| 2        | 1.00           | 0.50                     | 1.01                                    |
+| 3        | 1.01           | 0.67                     | 1.00                                    |
+| 4        | 1.00           | 0.75                     | 1.00                                    |
+| 5        | 1.01           | 0.80                     | 1.00                                    |
+| 6        | 0.99           | 0.83                     | 1.00                                    |
+
+Mientras la cantidad de trabajadores no supera los núcleos rápidos disponibles,
+cada trabajador del esquema dinámico rinde igual que un proceso del esquema
+estático (eficiencia ≈ 1.00 en ambos). El esquema dinámico no es intrínsecamente
+menos eficiente: su costo es exactamente un proceso de coordinación, que pesa
+mucho con pocos procesos (con 2 procesos se pierde la mitad del poder de
+cómputo) y se diluye a medida que aumenta la cantidad de trabajadores.
 
 Observaciones y análisis detallado:
 
