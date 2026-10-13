@@ -125,3 +125,13 @@ cada maquina que tenga su `speedup.csv`.
 ```bash
 python3 src/graficos-dispersion.py
 ```
+
+## Influencia del tamanio del problema
+
+Mide como cambia el speedup al variar la cantidad de grupos (T) y las personas
+por grupo (K). Los datos ya estan en `resultados/tamanio/`; para regenerar los
+graficos:
+
+```bash
+python3 src/graficos-tamanio.py
+```

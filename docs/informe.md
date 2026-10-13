@@ -504,6 +504,100 @@ Observaciones y análisis detallado:
 - **La precisión no depende del tamaño de bloque ni del hardware:**
   - En todos los escenarios, la probabilidad estimada converge a ~0.5070 con 2.000.000 de grupos frente al valor teórico de 0.5073, confirmando que la partición en bloques y la concurrencia no alteran los resultados matemáticos.
 
+### 5.5 Influencia del tamaño del problema
+
+Las mediciones anteriores se realizaron siempre con dos millones de grupos.
+Esta sección analiza cómo cambia el speedup al variar el tamaño del problema.
+Las mediciones corresponden a la notebook de Nicolás y se reporta la mediana de
+las repeticiones de cada configuración.
+
+Conviene distinguir dos magnitudes que podrían confundirse: **T**, la cantidad
+de grupos simulados, que determina el volumen total de trabajo, y **K**, la
+cantidad de personas por grupo, que determina el trabajo dentro de cada unidad.
+
+#### Variación de la cantidad de grupos (T)
+
+Tiempo de cómputo medido con `MPI_Wtime`, con K=23 y mediana de siete corridas:
+
+| T (grupos) | T_serial | Speedup p=2 | p=4 | p=6 | p=8 | p=10 |
+| ---------- | -------- | ----------- | --- | --- | --- | ---- |
+| 1.000 | 0.00045 s | 1.81 | 3.75 | 5.56 | 3.33 | 3.38 |
+| 10.000 | 0.00456 s | 1.94 | 3.80 | 5.70 | 4.45 | 4.40 |
+| 100.000 | 0.04553 s | 1.95 | 3.83 | 5.55 | 4.65 | 5.01 |
+| 1.000.000 | 0.45407 s | 1.96 | 3.84 | 5.58 | 5.79 | 5.98 |
+
+![Speedup según el tamaño del problema](../resultados/tamanio/speedup-por-tamanio.png)
+
+Con pocos procesos el tamaño del problema resulta indiferente: el speedup con
+dos, cuatro y seis procesos es prácticamente el mismo para mil grupos que para
+un millón. La diferencia aparece con muchos procesos, donde el speedup mejora
+sensiblemente al agrandar el problema. Esto ocurre porque existe un costo fijo
+por corrida (la barrera de sincronización, la reducción final y la puesta en
+marcha de cada proceso) que no depende de T: cuando el trabajo asignado a cada
+proceso es pequeño, ese costo representa una fracción considerable del tiempo;
+cuando es grande, se diluye.
+
+El efecto resulta mucho más contundente al medir el **tiempo total del
+comando**, que incluye la puesta en marcha del entorno MPI (mediana de tres
+corridas, con ocho procesos):
+
+| T (grupos) | Serial | 8 procesos | Ganancia real |
+| ---------- | ------ | ---------- | ------------- |
+| 1.000 | 0.08 s | 0.09 s | 0.89× |
+| 10.000 | 0.07 s | 0.10 s | 0.70× |
+| 100.000 | 0.11 s | 0.11 s | 1.00× |
+| 1.000.000 | 0.52 s | 0.18 s | 2.89× |
+| 10.000.000 | 4.61 s | 0.85 s | 5.42× |
+
+![Ganancia real incluyendo el arranque de MPI](../resultados/tamanio/ganancia-real.png)
+
+Con problemas pequeños **la versión paralela es más lenta que la serial**: la
+ganancia cae por debajo de 1 porque lanzar ocho procesos cuesta más que
+simular los grupos. Recién a partir del millón de grupos la paralelización
+empieza a rendir, y con diez millones alcanza una ganancia real superior a
+cinco veces. El paralelismo solo resulta rentable cuando el trabajo asignado a
+cada proceso supera ampliamente el costo de ponerlos en marcha y coordinarlos.
+
+Este comportamiento es una manifestación directa de la **ley de Amdahl**: la
+porción no paralelizable del programa (inicialización, sincronización y
+reducción) es aproximadamente constante, de modo que su peso relativo disminuye
+a medida que crece la parte paralelizable.
+
+#### Variación del tamaño del grupo (K)
+
+Medición con T=1.000.000 fijo y mediana de cinco corridas:
+
+| K (personas) | T_serial | 8 procesos | Speedup |
+| ------------ | -------- | ---------- | ------- |
+| 5 | 0.3582 s | 0.0672 s | 5.33 |
+| 10 | 0.3864 s | 0.0728 s | 5.31 |
+| 23 | 0.4576 s | 0.0836 s | 5.47 |
+| 50 | 0.5083 s | 0.0879 s | 5.78 |
+| 100 | 0.5134 s | 0.0889 s | 5.78 |
+| 200 | 0.5166 s | 0.0876 s | 5.90 |
+
+![Efecto del tamaño del grupo K](../resultados/tamanio/efecto-k.png)
+
+El valor de K prácticamente **no influye sobre el speedup**, que se mantiene
+entre 5.3 y 5.9 mientras K varía en un factor de cuarenta. La leve tendencia
+creciente es consistente con el mismo argumento anterior (más trabajo por
+unidad diluye los costos fijos), pero su magnitud es pequeña comparada con el
+efecto de T. El resultado es esperable: modificar K cambia el trabajo contenido
+en cada unidad, pero no la forma en que esas unidades se reparten entre los
+procesos, que sigue siendo equitativa, ni el volumen de comunicación, que
+continúa siendo un único entero por proceso.
+
+Resulta llamativo que el tiempo serial apenas aumente a partir de K=50 pese a
+seguir duplicándose la cantidad de personas. La explicación está en el corte
+temprano del algoritmo: con cincuenta personas la coincidencia es casi segura,
+de modo que el bucle se interrumpe mucho antes de llegar a la última persona y
+el resto nunca se sortea.
+
+> **Nota metodológica:** los tiempos de esta sección se midieron con una copia
+> de los programas que imprime siete decimales en lugar de tres, porque con mil
+> grupos los valores son del orden de la décima de milisegundo y la precisión
+> original los redondeaba. Los datos crudos están en `resultados/tamanio/`.
+
 ## 6. Conclusiones
 
 1. La simulación reproduce el valor teórico con buena precisión: con 2.000.000 de grupos y K=23 se obtuvo una probabilidad estimada de 0.5070 frente al valor exacto 0.5073, con un error del orden de 0.0003, independiente del tamaño de bloque o esquema utilizado.
