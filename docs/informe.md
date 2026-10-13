@@ -210,10 +210,9 @@ K ≥ 57 la probabilidad supera el 99%, como anticipa el enunciado.
 ### 5.3 Speedup y eficiencia
 
 Todas las mediciones usan 2.000.000 de grupos y K=23. Fórmulas: **Sp = T1 / Tp**
-y **Ep = Sp / p**. En la notebook de Nicolás cada configuración se ejecutó **10
-veces** y se reporta la **mediana**; en las demás máquinas se comparan además las
-dos estrategias (estática y dinámica) y, para el dinámico, se reporta el mejor
-tamaño de bloque en cada cantidad de procesos.
+y **Ep = Sp / p**. Cada configuración se ejecutó **10 veces** y se reporta
+la **mediana**; además se comparan las dos estrategias (estática y dinámica) 
+y, para el dinámico, se reporta el mejor tamaño de bloque en cada cantidad de procesos.
 
 Se midieron en cinco escenarios:
 
