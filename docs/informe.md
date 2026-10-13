@@ -352,6 +352,20 @@ Con SMT activado el procesador aprovecha las burbujas de los pipelines y alcanza
 un speedup de 11.61 con 16 procesos (0.051 s frente a 0.072 s sin SMT), una
 mejora real del ~42%.
 
+Entre 9 y 13 procesos el dinámico es superior (0.080 s contra 0.083 s en 9 y
+0.062 s contra 0.063 s en 13, aunque en 12 y 13 la diferencia es mínima).
+Probablemente se debe a cómo el sistema operativo distribuye los procesos:
+primero ocupa los núcleos físicos y después usa los segundos hilos, así que
+algunos núcleos quedan con 1 proceso y otros con 2, y los que comparten núcleo
+corren más lento. Como el tiempo total depende del proceso más lento, en el
+estático los núcleos con un solo proceso terminan antes y quedan ociosos. En el
+dinámico, en cambio, los que terminan antes siguen pidiendo bloques al maestro,
+lo que compensa el costo de tener un proceso dedicado solo a repartir trabajo.
+
+En la notebook de Francisco esto no ocurre en la zona equivalente (5 a 8
+procesos, con 4 núcleos y 8 hilos): ahí el estático gana, porque con solo 4
+núcleos el costo del maestro pesa proporcionalmente más.
+
 ![Mapa de calor: tiempo según bloques y procesos — Sergio (SMT activado)](../resultados/sergio_smt/bloques.png)
 
 Con SMT la franja fría se extiende más allá de los 8 procesos, llegando hasta
