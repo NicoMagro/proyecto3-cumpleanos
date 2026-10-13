@@ -527,9 +527,26 @@ Observaciones y análisis detallado:
 - **Problema generalizado:** permitir años de D días, lo que conecta el
   problema con las colisiones de funciones de hash en criptografía (el llamado
   _birthday attack_).
-- **Semilla configurable por línea de comandos**, necesaria para el
-  experimento de convergencia con repeticiones independientes.
 - **Separar las semillas de los procesos** (por ejemplo `12345 + rango * 7919`)
   y verificar la independencia de las secuencias comparando la estimación que
   produce cada semilla por separado.
 
+## 8. Referencias
+
+Cátedra de Métodos Numéricos II – Computación Científica. (2026). *Computación
+de alto rendimiento para aplicaciones numéricas* [Material de clase]. Facultad
+de Ciencias Exactas y Tecnología, Universidad Nacional de Tucumán.
+
+Cátedra de Métodos Numéricos II – Computación Científica. (2026). *Trabajo
+práctico 1: HPC* [Material de clase]. Facultad de Ciencias Exactas y
+Tecnología, Universidad Nacional de Tucumán.
+
+The Open MPI Project. (s.f.). *Open MPI documentation*. Recuperado el 12 de
+octubre de 2026, de https://www.open-mpi.org/doc/
+
+> **Falta completar:** estas son las únicas fuentes que efectivamente se
+> consultaron para este trabajo. Antes de la entrega hay que agregar la
+> bibliografía sobre la paradoja del cumpleaños y sobre el método de Monte
+> Carlo, y citarla en el texto donde corresponda (secciones 2 y 3). APA exige
+> que toda obra listada aquí aparezca citada en el cuerpo del informe, y
+> viceversa.
